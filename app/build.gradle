@@ -5,11 +5,18 @@ apply plugin: 'com.github.triplet.play'
 
 apply from: "${rootDir}/gradle/android_general.gradle"
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     defaultConfig {
         applicationId 'com.menny.android.anysoftkeyboard'
         versionCode rootProject.autoVersioning.versionData.versionCode
-        versionName rootProject.autoVersioning.versionData.versionName
+        //versionName rootProject.autoVersioning.versionData.versionName
+        versionName "1.10.1570"
+        archivesBaseName = "AnySoftKeyboard-v$versionName"
 
         println "Building AnySoftKeyboard ${versionName} (or ${project.version}), code ${versionCode}."
 
@@ -24,23 +31,20 @@ android {
 
     signingConfigs {
         release {
-            if (file("/tmp/anysoftkeyboard.keystore").exists()) {
-                storeFile file("/tmp/anysoftkeyboard.keystore")
-                storePassword System.getenv("ANYSOFTKEYBOARD_KEYSTORE_PASSWORD")
-                keyAlias System.getenv("ANYSOFTKEYBOARD_KEYSTORE_ALIAS")
-                keyPassword System.getenv("ANYSOFTKEYBOARD_KEYSTORE_KEY_PASSWORD")
-                println "Using 'anysoftkeyboard.keystore' to release APK (with alias '${keyAlias}')."
-            } else {
-                println "Could not find 'anysoftkeyboard.keystore' file. Release APK will not be signed."
-            }
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            v1SigningEnabled true
+            v2SigningEnabled false
+            v2SigningEnabled false
+            println "Using '${storeFile}' to release APK (with alias '${keyAlias}')."
         }
     }
 
     buildTypes {
         release {
-            if (file("/tmp/anysoftkeyboard.keystore").exists()) {
-                signingConfig signingConfigs.release
-            }
+            signingConfig signingConfigs.release
             zipAlignEnabled true
             debuggable false
 
@@ -49,10 +53,14 @@ android {
         }
 
         debug {
+            signingConfig signingConfigs.release
             testCoverageEnabled true
+            minifyEnabled false
         }
 
         canary {
+            minifyEnabled true
+            signingConfig signingConfigs.release
             initWith buildTypes.release
 
             matchingFallbacks = ['release', 'debug']
