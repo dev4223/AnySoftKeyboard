@@ -15,7 +15,7 @@ android {
         applicationId 'com.menny.android.anysoftkeyboard'
         versionCode rootProject.autoVersioning.versionData.versionCode
         //versionName rootProject.autoVersioning.versionData.versionName
-        versionName "1.10.1570"
+        versionName "1.10.1572"
         archivesBaseName = "AnySoftKeyboard-v$versionName"
 
         println "Building AnySoftKeyboard ${versionName} (or ${project.version}), code ${versionCode}."
