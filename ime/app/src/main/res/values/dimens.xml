@@ -36,7 +36,7 @@
     <dimen name="lean_key_text_size">18sp</dimen>
     <dimen name="lean_big_key_text_size">24sp</dimen>
     <dimen name="key_label_text_size">14sp</dimen>
-    <dimen name="key_hint_text_size">9sp</dimen>
+    <dimen name="key_hint_text_size">7sp</dimen>
     <dimen name="keyboard_name_text_size">10sp</dimen>
 
     <dimen name="candidate_strip_height">36dp</dimen>

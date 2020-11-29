@@ -38,7 +38,7 @@
     <dimen name="lean_key_text_size">21sp</dimen>
     <dimen name="lean_big_key_text_size">27sp</dimen>
     <dimen name="key_label_text_size">17sp</dimen>
-    <dimen name="key_hint_text_size">10sp</dimen>
+    <dimen name="key_hint_text_size">8sp</dimen>
 
     <dimen name="keyboard_name_text_size">12sp</dimen>
 
