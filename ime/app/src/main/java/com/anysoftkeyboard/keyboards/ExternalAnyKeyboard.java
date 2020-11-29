@@ -34,7 +34,6 @@ import com.anysoftkeyboard.keyboards.AnyKeyboard.HardKeyboardTranslator;
 import com.anysoftkeyboard.utils.LocaleTools;
 import com.menny.android.anysoftkeyboard.AnyApplication;
 import com.menny.android.anysoftkeyboard.BuildConfig;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -63,7 +62,7 @@ public class ExternalAnyKeyboard extends AnyKeyboard implements HardKeyboardTran
     @NonNull private final CharSequence mName;
     private final int mIconId;
     private final String mDefaultDictionary;
-    private final Locale mLocale;
+    @NonNull private final Locale mLocale;
     private final HardKeyboardSequenceHandler mHardKeyboardTranslator;
     private final Set<Integer> mAdditionalIsLetterExceptions;
     private final char[] mSentenceSeparators;
@@ -353,7 +352,7 @@ public class ExternalAnyKeyboard extends AnyKeyboard implements HardKeyboardTran
     }
 
     @Override
-    public Locale getLocale() {
+    public @NonNull Locale getLocale() {
         return mLocale;
     }
 
@@ -418,7 +417,6 @@ public class ExternalAnyKeyboard extends AnyKeyboard implements HardKeyboardTran
     }
 
     @Override
-    @SuppressFBWarnings("EI_EXPOSE_REP")
     public char[] getSentenceSeparators() {
         return mSentenceSeparators;
     }

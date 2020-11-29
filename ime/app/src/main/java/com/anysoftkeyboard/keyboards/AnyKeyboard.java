@@ -473,8 +473,9 @@ public abstract class AnyKeyboard extends Keyboard {
 
     public abstract String getDefaultDictionaryLocale();
 
+    @NonNull
     public Locale getLocale() {
-        return Locale.getDefault();
+        return Locale.ROOT;
     }
 
     // this function is called from within the super constructor.
@@ -760,6 +761,7 @@ public abstract class AnyKeyboard extends Keyboard {
             longPressCode = 0;
             shiftedKeyLabel = null;
             hintLabel = null;
+            boolean mShiftCodesAlwaysOverride = false;
 
             final int[] remoteStyleableArrayFromLocal =
                     resourceMapping.getRemoteStyleableArrayFromLocal(
@@ -788,6 +790,10 @@ public abstract class AnyKeyboard extends Keyboard {
                             break;
                         case R.attr.shiftedKeyLabel:
                             shiftedKeyLabel = a.getString(remoteIndex);
+                            break;
+                        case R.attr.isShiftAlways:
+                            mShiftCodesAlwaysOverride = true;
+                            mShiftCodesAlways = a.getBoolean(remoteIndex, false);
                             break;
                         case R.attr.hintLabel:
                             hintLabel = a.getString(remoteIndex);
@@ -830,14 +836,16 @@ public abstract class AnyKeyboard extends Keyboard {
                 }
             }
 
-            // if the shift-character is a symbol, we only show it if the SHIFT is pressed,
-            // not if the shift is active.
-            mShiftCodesAlways =
-                    mShiftedCodes.length == 0
-                            || Character.isLetter(mShiftedCodes[0])
-                            || Character.getType(mShiftedCodes[0]) == Character.NON_SPACING_MARK
-                            || Character.getType(mShiftedCodes[0])
-                                    == Character.COMBINING_SPACING_MARK;
+            if (!mShiftCodesAlwaysOverride) {
+                // if the shift-character is a symbol, we only show it if the SHIFT is pressed,
+                // not if the shift is active.
+                mShiftCodesAlways =
+                        mShiftedCodes.length == 0
+                                || Character.isLetter(mShiftedCodes[0])
+                                || Character.getType(mShiftedCodes[0]) == Character.NON_SPACING_MARK
+                                || Character.getType(mShiftedCodes[0])
+                                        == Character.COMBINING_SPACING_MARK;
+            }
 
             if (popupCharacters != null && popupCharacters.length() == 0) {
                 // If there is a keyboard with no keys specified in

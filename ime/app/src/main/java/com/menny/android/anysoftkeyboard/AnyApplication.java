@@ -44,6 +44,7 @@ import com.anysoftkeyboard.devicespecific.DeviceSpecificV14;
 import com.anysoftkeyboard.devicespecific.DeviceSpecificV16;
 import com.anysoftkeyboard.devicespecific.DeviceSpecificV19;
 import com.anysoftkeyboard.devicespecific.DeviceSpecificV24;
+import com.anysoftkeyboard.devicespecific.DeviceSpecificV28;
 import com.anysoftkeyboard.dictionaries.ExternalDictionaryFactory;
 import com.anysoftkeyboard.keyboardextensions.KeyboardExtension;
 import com.anysoftkeyboard.keyboardextensions.KeyboardExtensionFactory;
@@ -53,7 +54,6 @@ import com.anysoftkeyboard.quicktextkeys.QuickTextKeyFactory;
 import com.anysoftkeyboard.saywhat.PublicNotice;
 import com.anysoftkeyboard.theme.KeyboardThemeFactory;
 import com.anysoftkeyboard.ui.tutorials.TutorialsProvider;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
@@ -134,7 +134,6 @@ public class AnyApplication extends Application {
                 filename);
     }
 
-    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -306,7 +305,8 @@ public class AnyApplication extends Application {
         if (apiLevel < 16) return new DeviceSpecificV14();
         if (apiLevel < 19) return new DeviceSpecificV16();
         if (apiLevel < 24) return new DeviceSpecificV19();
-        return new DeviceSpecificV24();
+        if (apiLevel < 28) return new DeviceSpecificV24();
+        return new DeviceSpecificV28();
     }
 
     @CallSuper

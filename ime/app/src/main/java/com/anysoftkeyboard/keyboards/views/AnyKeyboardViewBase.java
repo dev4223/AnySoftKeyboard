@@ -78,7 +78,6 @@ import com.anysoftkeyboard.utils.EmojiUtils;
 import com.menny.android.anysoftkeyboard.AnyApplication;
 import com.menny.android.anysoftkeyboard.BuildConfig;
 import com.menny.android.anysoftkeyboard.R;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subjects.BehaviorSubject;
@@ -184,7 +183,7 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
     private boolean mShowKeyboardNameOnKeyboard;
     private boolean mShowHintsOnKeyboard;
     private int mCustomHintGravity;
-    private float mDisplayDensity;
+    private final float mDisplayDensity;
     protected final Subject<AnimationsLevel> mAnimationLevelSubject =
             BehaviorSubject.createDefault(AnimationsLevel.Some);
     private float mKeysHeightFactor = 1f;
@@ -344,7 +343,11 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
                                 this::updatePrefSettingsHintTextSizeFactor,
                                 GenericOnError.onError("failed to get settings_key_hint_size")));
 
-        AnimationsLevel.createPrefsObservable(context).subscribe(mAnimationLevelSubject);
+        mDisposables.add(
+                AnimationsLevel.createPrefsObservable(context)
+                        .subscribe(
+                                mAnimationLevelSubject::onNext,
+                                GenericOnError.onError("mAnimationLevelSubject")));
 
         mDisposables.add(
                 rxSharedPrefs
@@ -1941,7 +1944,6 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
         return false;
     }
 
-    @SuppressFBWarnings("EI_EXPOSE_REP")
     public int[] getLocationInWindow() {
         getLocationInWindow(mThisWindowOffset);
         return mThisWindowOffset;

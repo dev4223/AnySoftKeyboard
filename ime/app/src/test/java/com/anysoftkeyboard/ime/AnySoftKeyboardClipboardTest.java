@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowSystemClock;
 import org.robolectric.shadows.ShadowToast;
 
@@ -189,7 +190,7 @@ public class AnySoftKeyboardClipboardTest extends AnySoftKeyboardBaseTest {
         Assert.assertEquals("te", inputConnection.getSelectedText(0).toString());
 
         mAnySoftKeyboardUnderTest.simulateKeyPress('k');
-        // selection was replaced with space
+        // selection ('te') was replaced with the letter 'k'
         Assert.assertEquals("", inputConnection.getSelectedText(0).toString());
         Assert.assertEquals(
                 "some kxt in the input connection",
@@ -203,8 +204,8 @@ public class AnySoftKeyboardClipboardTest extends AnySoftKeyboardBaseTest {
     @Test
     public void testSelectionExpendingWithAlreadySelectedText() {
         TestInputConnection inputConnection =
-                (TestInputConnection) mAnySoftKeyboardUnderTest.getCurrentInputConnection();
-        inputConnection.commitText("some text in the input connection", 1);
+                mAnySoftKeyboardUnderTest.getCurrentTestInputConnection();
+        mAnySoftKeyboardUnderTest.simulateTextTyping("some text in the input connection");
         inputConnection.setSelection("some ".length(), "some text".length());
         // we already have selection set
         Assert.assertEquals("text", inputConnection.getSelectedText(0).toString());
@@ -274,6 +275,142 @@ public class AnySoftKeyboardClipboardTest extends AnySoftKeyboardBaseTest {
         Assert.assertEquals(
                 "something very",
                 latestAlertDialog.getListView().getAdapter().getItem(1).toString());
+    }
+
+    @Test
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void testDeleteFirstEntry() {
+        ClipboardManager shadowManager =
+                (ClipboardManager)
+                        getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        TestInputConnection inputConnection =
+                (TestInputConnection) mAnySoftKeyboardUnderTest.getCurrentInputConnection();
+        final String expectedText = "testing something very long";
+        inputConnection.commitText(expectedText, 1);
+        inputConnection.setSelection("testing ".length(), "testing something very".length());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_COPY);
+        inputConnection.setSelection(0, "testing ".length());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_COPY);
+
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE_POPUP);
+
+        AlertDialog latestAlertDialog = GeneralDialogTestUtil.getLatestShownDialog();
+        Assert.assertNotNull(latestAlertDialog);
+        Assert.assertEquals(2, latestAlertDialog.getListView().getAdapter().getCount());
+        latestAlertDialog
+                .getListView()
+                .getAdapter()
+                .getView(0, null, latestAlertDialog.getListView())
+                .findViewById(R.id.clipboard_entry_delete)
+                .performClick();
+
+        Assert.assertFalse(latestAlertDialog.isShowing());
+
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE_POPUP);
+        latestAlertDialog = GeneralDialogTestUtil.getLatestShownDialog();
+        Assert.assertEquals(1, latestAlertDialog.getListView().getAdapter().getCount());
+        Assert.assertEquals(
+                "something very",
+                latestAlertDialog.getListView().getAdapter().getItem(0).toString());
+
+        latestAlertDialog.dismiss();
+
+        // also, pasting should paste the previous entry
+        Assert.assertEquals(
+                "testing something very long",
+                mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE);
+        Assert.assertEquals(
+                "something verysomething very long",
+                mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+
+        Assert.assertEquals("", shadowManager.getPrimaryClip().getItemAt(0).getText());
+    }
+
+    @Test
+    @TargetApi(Build.VERSION_CODES.P)
+    @Config(sdk = Build.VERSION_CODES.P)
+    public void testDeleteFirstEntryForApi28() {
+        TestInputConnection inputConnection =
+                (TestInputConnection) mAnySoftKeyboardUnderTest.getCurrentInputConnection();
+        final String expectedText = "testing something very long";
+        inputConnection.commitText(expectedText, 1);
+        inputConnection.setSelection("testing ".length(), "testing something very".length());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_COPY);
+        inputConnection.setSelection(0, "testing ".length());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_COPY);
+
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE_POPUP);
+
+        AlertDialog latestAlertDialog = GeneralDialogTestUtil.getLatestShownDialog();
+        Assert.assertNotNull(latestAlertDialog);
+        Assert.assertEquals(2, latestAlertDialog.getListView().getAdapter().getCount());
+        latestAlertDialog
+                .getListView()
+                .getAdapter()
+                .getView(0, null, latestAlertDialog.getListView())
+                .findViewById(R.id.clipboard_entry_delete)
+                .performClick();
+
+        Assert.assertFalse(latestAlertDialog.isShowing());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE_POPUP);
+        latestAlertDialog = GeneralDialogTestUtil.getLatestShownDialog();
+        Assert.assertEquals(1, latestAlertDialog.getListView().getAdapter().getCount());
+        Assert.assertEquals(
+                "something very",
+                latestAlertDialog.getListView().getAdapter().getItem(0).toString());
+
+        latestAlertDialog.dismiss();
+
+        // also, pasting should paste nothing (we deleted the primary clip)
+        Assert.assertEquals(
+                "testing something very long",
+                mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE);
+        Assert.assertEquals(
+                "something verysomething very long",
+                mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+        // actually deletes the primary clip
+        // TODO: I think this is broken with Robolectric 4.3.1
+        // Assert.assertFalse(shadowManager.hasPrimaryClip());
+    }
+
+    @Test
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void testDeleteNotFirstEntry() {
+        ClipboardManager shadowManager =
+                (ClipboardManager)
+                        getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        TestInputConnection inputConnection =
+                (TestInputConnection) mAnySoftKeyboardUnderTest.getCurrentInputConnection();
+        final String expectedText = "testing something very long";
+        inputConnection.commitText(expectedText, 1);
+        inputConnection.setSelection("testing ".length(), "testing something very".length());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_COPY);
+        inputConnection.setSelection(0, "testing ".length());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_COPY);
+
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE_POPUP);
+
+        AlertDialog latestAlertDialog = GeneralDialogTestUtil.getLatestShownDialog();
+        Assert.assertNotNull(latestAlertDialog);
+        Assert.assertEquals(2, latestAlertDialog.getListView().getAdapter().getCount());
+        latestAlertDialog
+                .getListView()
+                .getAdapter()
+                .getView(1, null, latestAlertDialog.getListView())
+                .findViewById(R.id.clipboard_entry_delete)
+                .performClick();
+
+        Assert.assertFalse(latestAlertDialog.isShowing());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.CLIPBOARD_PASTE_POPUP);
+        latestAlertDialog = GeneralDialogTestUtil.getLatestShownDialog();
+        Assert.assertEquals(1, latestAlertDialog.getListView().getAdapter().getCount());
+        Assert.assertEquals(
+                "testing ", latestAlertDialog.getListView().getAdapter().getItem(0).toString());
+
+        Assert.assertEquals(
+                "testing ", shadowManager.getPrimaryClip().getItemAt(0).getText().toString());
     }
 
     @Test
@@ -476,7 +613,6 @@ public class AnySoftKeyboardClipboardTest extends AnySoftKeyboardBaseTest {
                         .findViewById(R.id.clipboard_suggestion_text);
         Assert.assertNotNull(clipboardView);
         Assert.assertEquals("text 1", clipboardView.getText().toString());
-        Assert.assertEquals(InputType.TYPE_CLASS_TEXT, clipboardView.getInputType());
         ((View) clipboardView.getParent()).performClick();
         Assert.assertEquals("text 1", mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
         Assert.assertNull(
@@ -536,11 +672,79 @@ public class AnySoftKeyboardClipboardTest extends AnySoftKeyboardBaseTest {
                             .getInputViewContainer()
                             .findViewById(R.id.clipboard_suggestion_text);
             Assert.assertNotNull("for " + variation, clipboardView);
-            Assert.assertEquals("for " + variation, "text 1", clipboardView.getText().toString());
             Assert.assertEquals(
-                    "for " + variation,
-                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                    clipboardView.getInputType());
+                    "for " + variation, "**********", clipboardView.getText().toString());
+
+            simulateFinishInputFlow();
+        }
+    }
+
+    @Test
+    public void testShowStripActionAsPasswordIfClipboardWasOriginatedInPassword() {
+        simulateFinishInputFlow();
+
+        simulateOnStartInputFlow(
+                false,
+                createEditorInfo(
+                        EditorInfo.IME_ACTION_NONE,
+                        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD));
+
+        ClipboardManager clipboardManager =
+                (ClipboardManager)
+                        getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboardManager.setPrimaryClip(
+                new ClipData("text 1", new String[0], new ClipData.Item("text 1")));
+
+        simulateFinishInputFlow();
+        simulateOnStartInputFlow();
+
+        final TextView clipboardView =
+                mAnySoftKeyboardUnderTest
+                        .getInputViewContainer()
+                        .findViewById(R.id.clipboard_suggestion_text);
+        Assert.assertNotNull(clipboardView);
+        Assert.assertEquals("**********", clipboardView.getText().toString());
+
+        simulateFinishInputFlow();
+    }
+
+    @Test
+    public void testShowStripActionAsNonPasswordIfClipboardIsNotEmptyInNonPasswordField() {
+        simulateFinishInputFlow();
+        ClipboardManager clipboardManager =
+                (ClipboardManager)
+                        getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboardManager.setPrimaryClip(
+                new ClipData("text 1", new String[0], new ClipData.Item("text 1")));
+
+        int[] variations =
+                new int[] {
+                    InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT,
+                    InputType.TYPE_TEXT_VARIATION_FILTER,
+                    InputType.TYPE_TEXT_VARIATION_PHONETIC,
+                    InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                    InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS,
+                    InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
+                    InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE,
+                    InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE,
+                    InputType.TYPE_TEXT_VARIATION_EMAIL_SUBJECT,
+                    InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                    InputType.TYPE_TEXT_VARIATION_URI,
+                    InputType.TYPE_TEXT_VARIATION_NORMAL,
+                };
+
+        for (int variation : variations) {
+            simulateOnStartInputFlow(
+                    false,
+                    createEditorInfo(
+                            EditorInfo.IME_ACTION_NONE, InputType.TYPE_CLASS_TEXT | variation));
+
+            final TextView clipboardView =
+                    mAnySoftKeyboardUnderTest
+                            .getInputViewContainer()
+                            .findViewById(R.id.clipboard_suggestion_text);
+            Assert.assertNotNull("for " + variation, clipboardView);
+            Assert.assertEquals("for " + variation, "text 1", clipboardView.getText().toString());
 
             simulateFinishInputFlow();
         }
