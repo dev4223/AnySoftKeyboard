@@ -19,6 +19,17 @@
         <property name="message" value="Do not use this. Use only official icons." />
     </module>
 
+    <module name="RegexpOnFilename">
+        <property name="match" value="true"/>
+        <property name="fileNamePattern" value="^beta\.txt$"/>
+    </module>
+
+
+    <module name="RegexpOnFilename">
+        <property name="match" value="true"/>
+        <property name="fileNamePattern" value="^production\.txt$"/>
+    </module>
+
     <module name="TreeWalker">
         <module name="SuppressWarningsHolder" />
 
@@ -114,6 +125,12 @@
             <property name="id" value="DoNotUseSystemOut" />
             <property name="format" value="System\.out" />
             <property name="message" value="Do not use System.out, use Logger instead" />
+        </module>
+
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="DoNotUseThreadDump" />
+            <property name="format" value="Thread\.dumpStack" />
+            <property name="message" value="Do not use dumpStack method, is looks like debug code." />
         </module>
 
         <module name="RegexpSinglelineJava">
@@ -221,5 +238,14 @@
 
         <!-- allows suppressing using the //CHECKSTYLE:ON //CHECKSTYLE:OFF -->
         <module name="SuppressionCommentFilter" />
+    </module>
+
+    <module name="NewlineAtEndOfFile">
+        <property name="fileExtensions" value="java, xml, gradle, groovy, md, sh, propertie, yml"/>
+    </module>
+
+    <module name="FileTabCharacter">
+        <property name="fileExtensions" value="java, xml, gradle, groovy, md, sh, properties, yml"/>
+        <property name="eachLine" value="true"/>
     </module>
 </module>

@@ -1,5 +1,6 @@
 name: "Run tests"
 author: "menny"
+description: "Runs tests using Gradle and sharding support"
 
 inputs:
   index:
@@ -12,9 +13,11 @@ inputs:
     default: ""
 runs:
   using: "docker"
-  image: "docker://menny/ndk_ask:1.13.1"
+  image: "docker://menny/ndk_ask:1.13.7"
   env:
     TERM: dumb
+    GRADLE_USER_HOME: ".github_cache_gradle/"
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false --stacktrace"
   entrypoint: /bin/bash
   args:
     - .github/actions/test-shard-run/run_tests.sh

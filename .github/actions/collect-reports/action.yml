@@ -1,16 +1,18 @@
-name: "Collect reports"
+name: "collect-reports"
 author: "menny"
+description: "Collect checks report files"
 
 inputs:
   output_folder:
     description: "collect destination"
     default: "collected_reports"
   file_pattern:
-    description: "pattern"
+    description: "pattern for files"
+    required: true
 
 runs:
   using: "docker"
-  image: "docker://menny/ndk_ask:1.13.1"
+  image: "docker://menny/ndk_ask:1.13.7"
   entrypoint: /bin/bash
   args:
     - .github/actions/collect-reports/collect.sh
@@ -19,4 +21,4 @@ runs:
 
 branding:
   icon: 'package'
-  color: 'brown'
+  color: 'green'

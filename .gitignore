@@ -9,6 +9,9 @@ keystore.properties
 outputs/
 app/release/
 
+#jacoco
+*.exec
+
 #ndk stuff
 .cxx
 .externalNativeBuild/
@@ -20,3 +23,19 @@ app/release/
 .settings/
 .classpath
 .vscode/
+
+#generated files
+*_words_*.dict
+*_words_dict_array.xml
+*.apk
+
+add_ons_apks/
+
+.robolectric-android-all-jars/
+
+#gradle build loggin
+build-logging/
+
+#changelogs are only included alpha.txt
+**/src/*/play/release-notes/*/beta.txt
+**/src/*/play/release-notes/*/production.txt

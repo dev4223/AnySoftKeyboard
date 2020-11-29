@@ -1,45 +1,52 @@
-name: "Deploy app"
+name: "deploy"
+description: "Deploys the AnySoftKeyboard artifacts to Play Store"
 author: "menny"
 
 inputs:
-  release_deploy:
-    description: "can be 'true', 'false' or 'dry-run'"
-  ref:
-    description: "the commit to calculate the version from"
-    default: "HEAD"
+  deployment_environment:
+    description: "Deploy to which environment"
+    required: true
+  deployment_task:
+    description: "Deployment task"
+    required: true
   crash_report_email:
     default: "none@example.com"
+    description: "email address for crash reporting "
+    required: true
   keystore_url:
     default: ""
+    description: "direct download URL to APK signing keystore"
+    required: true
   keystore_password:
     default: ""
-  keystore_key_alias:
-    default: ""
+    description: "APK signing keystore password"
+    required: true
   keystore_key_password:
     default: ""
-  publish_service_account_creds_url:
+    description: "APK signing keystore default key password"
+    required: true
+  publish_service_account_creds_json_url:
+    description: "url to the json certs file"
     default: ""
-  publish_service_account:
-    default: ""
+    required: true
 runs:
   using: "docker"
-  image: "docker://menny/ndk_ask:1.13.1"
+  image: "docker://menny/ndk_ask:1.13.7"
   env:
     TERM: dumb
-    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false --stacktrace"
+    GRADLE_USER_HOME: ".github_cache_gradle/"
 
   entrypoint: /bin/bash
   args:
     - .github/actions/deploy/deploy.sh
-    - ${{ inputs.release_deploy }}
-    - ${{ inputs.ref }}
+    - ${{ inputs.deployment_environment }}
+    - ${{ inputs.deployment_task }}
     - ${{ inputs.crash_report_email }}
     - ${{ inputs.keystore_url }}
     - ${{ inputs.keystore_password }}
-    - ${{ inputs.keystore_key_alias }}
     - ${{ inputs.keystore_key_password }}
-    - ${{ inputs.publish_service_account_creds_url }}
-    - ${{ inputs.publish_service_account }}
+    - ${{ inputs.publish_service_account_creds_json_url }}
 
 branding:
   icon: 'upload-cloud'

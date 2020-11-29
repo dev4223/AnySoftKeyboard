@@ -1,11 +1,17 @@
+import java.util.stream.Stream
+import java.nio.file.Files
+
 System.setProperty("file.encoding", "UTF-8")
+
+def logFile = rootProject.file("build-logging/build-log-${System.currentTimeMillis()}.log")
+gradle.addBuildListener(new BuildLogger(logFile))
 
 buildscript {
     repositories {
         google()
         mavenLocal()
         jcenter()
-        maven { url 'https://repo1.maven.org/maven2' /*maven-central with HTTPS*/}
+        maven { url 'https://repo1.maven.org/maven2' /*maven-central with HTTPS*/ }
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
         maven { url 'https://jitpack.io' }
         maven { url "https://plugins.gradle.org/m2/" }
@@ -19,17 +25,6 @@ buildscript {
     }
 }
 
-apply plugin: 'net.evendanan.autoversion.simple'
-
-autoVersioning {
-    enabled = rootProject.hasProperty("withAutoVersioning")
-    buildCounterEnvKey = "BUILD_COUNT_FOR_VERSION"
-    major = 1
-    minor = 10
-    buildCounterOffset = 1570/*adding to version. Should never change*/
-    patchOffset = -5170 /*decrementing due to minor, every minor/major bump, this should be decremented*/
-}
-
 apply plugin: 'com.github.sherter.google-java-format'
 
 googleJavaFormat {
@@ -41,7 +36,7 @@ allprojects {
     repositories {
         google()
         mavenLocal()
-        maven { url 'https://repo1.maven.org/maven2' /*maven-central with HTTPS*/}
+        maven { url 'https://repo1.maven.org/maven2' /*maven-central with HTTPS*/ }
         jcenter()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
         maven { url "https://jitpack.io" }
@@ -51,3 +46,22 @@ allprojects {
 apply from: "${rootDir}/gradle/emoji_generator.gradle"
 apply from: "${rootDir}/gradle/root_all_projects_ext.gradle"
 apply from: "${rootDir}/gradle/fdroid_yaml_output.gradle"
+
+
+tasks.register("clean", Delete) {
+    delete buildDir
+    //we do not want to delete the current log file
+    logFile.parentFile.listFiles().each {
+        if (it != null && it.absolutePath != logFile.absolutePath) {
+            delete it
+        }
+    }
+
+    //deleting all beta/production change-logs
+    Stream<Path> files = Files.walk(rootDir.toPath())
+    files.sorted(Comparator.reverseOrder())
+            .map { it.toFile() }
+            .filter { it.name == 'beta.txt' || it.name == 'production.txt' }
+            .forEach { it.deleteOnExit() }
+    files.close()
+}
