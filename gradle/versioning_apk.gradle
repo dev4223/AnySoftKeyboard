@@ -11,7 +11,9 @@ static Project findRootVersioningProject(Project proj) {
 android.defaultConfig {
     def versioningProject = findRootVersioningProject(project)
     versionCode versioningProject.autoVersioning.versionData.versionCode
-    versionName versioningProject.autoVersioning.versionData.versionName
+    //versionName versioningProject.autoVersioning.versionData.versionName
+    versionName "1.10.6307"
+    archivesBaseName = "AnySoftKeyboard-v$versionName"
 
     println "Building ${project.path} ${versionName} (or ${project.version}), code ${versionCode}."
 }
