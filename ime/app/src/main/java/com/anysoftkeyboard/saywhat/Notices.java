@@ -3,6 +3,7 @@ package com.anysoftkeyboard.saywhat;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ public class Notices {
     }
 
     private static class CoronaVirusDetails implements OnKey, OnVisible {
+        private static final long WEEK = 7L * 24L * 60L * 60L * 1000L;
 
         private final OnKeyWordHelper mTypedWordHelper;
         private final TimedNoticeHelper mTimeHelper;
@@ -34,8 +36,12 @@ public class Notices {
                     new TimedNoticeHelper(
                             context,
                             R.string.settings_key_public_notice_timed_covid,
-                            // 7 days
-                            7 * 24 * 60 * 60 * 1000);
+                            CoronaVirusDetails::nextTimeCalculator);
+        }
+
+        private static long nextTimeCalculator(final int timesShown) {
+            if (timesShown < 3) return (timesShown + 1) * WEEK;
+            else return Long.MAX_VALUE;
         }
 
         @Override
@@ -65,6 +71,7 @@ public class Notices {
         }
 
         @Override
+        @NonNull
         public String getName() {
             return "covid-19";
         }

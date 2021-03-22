@@ -7,8 +7,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -42,7 +40,6 @@ import com.anysoftkeyboard.overlay.OverlyDataCreator;
 import com.anysoftkeyboard.quicktextkeys.QuickKeyHistoryRecords;
 import com.anysoftkeyboard.quicktextkeys.TagsExtractor;
 import com.anysoftkeyboard.remote.RemoteInsertion;
-import com.anysoftkeyboard.saywhat.PublicNotice;
 import com.menny.android.anysoftkeyboard.R;
 import com.menny.android.anysoftkeyboard.SoftKeyboard;
 import java.util.ArrayList;
@@ -54,11 +51,10 @@ import java.util.Map;
 import org.junit.Assert;
 import org.mockito.MockingDetails;
 import org.mockito.Mockito;
-import org.robolectric.Robolectric;
 
 public class TestableAnySoftKeyboard extends SoftKeyboard {
-    public static final long DELAY_BETWEEN_TYPING = 25L; // 25ms between typing
-    private static final int DELAYED_SELECTION_UPDATE_MSG_ID = 88;
+    // Same as suggestions delay, so we'll get them after typing for verification
+    public static final long DELAY_BETWEEN_TYPING = GET_SUGGESTIONS_DELAY + 1;
 
     private Suggest mSpiedSuggest;
     private TestableKeyboardSwitcher mTestableKeyboardSwitcher;
@@ -73,8 +69,6 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     private int mLastOnKeyPrimaryCode;
     private AbstractInputMethodImpl mCreatedInputMethodInterface;
     private AbstractInputMethodSessionImpl mCreatedInputMethodSession;
-    private long mDelayedSelectionUpdate = 0L;
-    private Handler mDelayer;
 
     private OverlyDataCreator mOriginalOverlayDataCreator;
     private OverlyDataCreator mSpiedOverlayCreator;
@@ -97,11 +91,6 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     }
 
     @Override
-    protected List<PublicNotice> generatePublicNotices() {
-        return Collections.emptyList();
-    }
-
-    @Override
     protected boolean commitMediaToInputConnection(
             InputContentInfoCompat inputContentInfo,
             InputConnection inputConnection,
@@ -118,23 +107,6 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
 
     @Override
     public void onCreate() {
-        mDelayer =
-                new Handler() {
-                    @Override
-                    public void handleMessage(@NonNull Message msg) {
-                        super.handleMessage(msg);
-                        if (msg.what == DELAYED_SELECTION_UPDATE_MSG_ID) {
-                            final SelectionUpdateData data = (SelectionUpdateData) msg.obj;
-                            TestableAnySoftKeyboard.super.onUpdateSelection(
-                                    data.oldSelStart,
-                                    data.oldSelEnd,
-                                    data.newSelStart,
-                                    data.newSelEnd,
-                                    data.candidatesStart,
-                                    data.candidatesEnd);
-                        }
-                    }
-                };
         mRemoteInsertion = Mockito.mock(RemoteInsertion.class);
         mSpiedPackageManager = Mockito.spy(super.getPackageManager());
         super.onCreate();
@@ -143,33 +115,7 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     }
 
     public void setUpdateSelectionDelay(long delay) {
-        mDelayedSelectionUpdate = delay;
-    }
-
-    @Override
-    public void onUpdateSelection(
-            int oldSelStart,
-            int oldSelEnd,
-            int newSelStart,
-            int newSelEnd,
-            int candidatesStart,
-            int candidatesEnd) {
-        if (mDelayedSelectionUpdate > 0) {
-            mDelayer.sendMessageDelayed(
-                    mDelayer.obtainMessage(
-                            DELAYED_SELECTION_UPDATE_MSG_ID,
-                            new SelectionUpdateData(
-                                    oldSelStart,
-                                    oldSelEnd,
-                                    newSelStart,
-                                    newSelEnd,
-                                    candidatesStart,
-                                    candidatesEnd)),
-                    mDelayedSelectionUpdate);
-        } else {
-            super.onUpdateSelection(
-                    oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
-        }
+        mInputConnection.setUpdateSelectionDelay(delay);
     }
 
     @Override
@@ -350,6 +296,10 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
         return originalInputContainer;
     }
 
+    public AnyKeyboardView getSpiedKeyboardView() {
+        return mSpiedKeyboardView;
+    }
+
     @Override
     public PackageManager getPackageManager() {
         return mSpiedPackageManager;
@@ -405,7 +355,6 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
             }
         } else {
             onText(null, text);
-            if (advanceTime) Robolectric.flushForegroundThreadScheduler();
             if (advanceTime) SystemClock.sleep(DELAY_BETWEEN_TYPING);
         }
     }
@@ -427,7 +376,6 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     public void simulateKeyPress(final Keyboard.Key key, final boolean advanceTime) {
         final int primaryCode = key.getPrimaryCode();
         onPress(primaryCode);
-        if (advanceTime) Robolectric.flushForegroundThreadScheduler();
         final AnyKeyboard keyboard = getCurrentKeyboard();
         Assert.assertNotNull(keyboard);
         if (key instanceof AnyKeyboard.AnyKey /*this will ensure this instance is not a mock*/) {
@@ -446,10 +394,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
         } else {
             onKey(primaryCode, null, 0, new int[0], true);
         }
-        if (advanceTime) Robolectric.flushForegroundThreadScheduler();
-        if (advanceTime) SystemClock.sleep(DELAY_BETWEEN_TYPING);
         onRelease(primaryCode);
-        if (advanceTime) Robolectric.flushForegroundThreadScheduler();
+        if (advanceTime) SystemClock.sleep(DELAY_BETWEEN_TYPING);
     }
 
     @Nullable
@@ -493,6 +439,29 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
 
     public String getCurrentInputConnectionText() {
         return mInputConnection.getCurrentTextInInputConnection();
+    }
+
+    public String getCurrentSelectedText() {
+        return mInputConnection.getSelectedText(0).toString();
+    }
+
+    public void moveCursorToPosition(int position, boolean advanceTime) {
+        setSelectedText(position, position, advanceTime);
+    }
+
+    public void setSelectedText(int begin, int end, boolean advanceTime) {
+        mInputConnection.setSelection(begin, end);
+        if (advanceTime) SystemClock.sleep(DELAY_BETWEEN_TYPING);
+    }
+
+    public void onText(Keyboard.Key key, CharSequence text, boolean advanceTime) {
+        super.onText(key, text);
+        if (advanceTime) SystemClock.sleep(DELAY_BETWEEN_TYPING);
+    }
+
+    @Override
+    public void onText(Keyboard.Key key, CharSequence text) {
+        onText(key, text, true);
     }
 
     @Override
@@ -723,30 +692,6 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
 
         public List<AnyKeyboard> getCachedSymbolsKeyboards() {
             return Collections.unmodifiableList(Arrays.asList(mSymbolsKeyboardsArray));
-        }
-    }
-
-    private static class SelectionUpdateData {
-        final int oldSelStart;
-        final int oldSelEnd;
-        final int newSelStart;
-        final int newSelEnd;
-        final int candidatesStart;
-        final int candidatesEnd;
-
-        private SelectionUpdateData(
-                int oldSelStart,
-                int oldSelEnd,
-                int newSelStart,
-                int newSelEnd,
-                int candidatesStart,
-                int candidatesEnd) {
-            this.oldSelStart = oldSelStart;
-            this.oldSelEnd = oldSelEnd;
-            this.newSelStart = newSelStart;
-            this.newSelEnd = newSelEnd;
-            this.candidatesStart = candidatesStart;
-            this.candidatesEnd = candidatesEnd;
         }
     }
 }

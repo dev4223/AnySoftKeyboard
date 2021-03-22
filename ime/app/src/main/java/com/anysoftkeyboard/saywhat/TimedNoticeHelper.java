@@ -9,17 +9,37 @@ import com.menny.android.anysoftkeyboard.AnyApplication;
 import com.menny.android.anysoftkeyboard.R;
 
 public class TimedNoticeHelper {
+    public interface NextTimeProvider {
+        long getNextTimeOffset(int timesShown);
+    }
+
     private final Preference<String> mDataHolder;
-    private final long mTimeBetweenShows;
+    private final Preference<Integer> mTimesShownHolder;
+    private final NextTimeProvider mNextTimeInMilliSecondsProvider;
     private long mNextTimeToShow;
 
     public TimedNoticeHelper(
             @NonNull Context context, @StringRes int prefKey, long timeBetweenShows) {
-        mTimeBetweenShows = timeBetweenShows;
+        this(context, prefKey, timesShown -> timeBetweenShows);
+    }
+
+    public TimedNoticeHelper(
+            @NonNull Context context,
+            @StringRes int prefKey,
+            @NonNull NextTimeProvider timeProvider) {
+        mNextTimeInMilliSecondsProvider = timeProvider;
+        final String prefKeyTime = context.getString(prefKey);
+        final String prefKeyShown = context.getString(prefKey) + "_SHOWN_TIMES";
         mDataHolder =
                 AnyApplication.prefs(context)
                         .getString(
-                                prefKey, R.string.settings_default_notice_never_before_seen_value);
+                                prefKeyTime,
+                                R.string.settings_default_notice_never_before_seen_value);
+        mTimesShownHolder =
+                AnyApplication.prefs(context)
+                        .getInteger(
+                                prefKeyShown,
+                                R.integer.settings_default_notice_never_before_seen_times_value);
         mNextTimeToShow = Long.parseLong(mDataHolder.get());
     }
 
@@ -28,7 +48,11 @@ public class TimedNoticeHelper {
     }
 
     public void markAsShown() {
-        mNextTimeToShow = SystemClock.elapsedRealtime() + mTimeBetweenShows;
+        final int timesShown = mTimesShownHolder.get();
+        mTimesShownHolder.set(timesShown + 1);
+        mNextTimeToShow =
+                SystemClock.elapsedRealtime()
+                        + mNextTimeInMilliSecondsProvider.getNextTimeOffset(timesShown);
         mDataHolder.set(Long.toString(mNextTimeToShow));
     }
 }
