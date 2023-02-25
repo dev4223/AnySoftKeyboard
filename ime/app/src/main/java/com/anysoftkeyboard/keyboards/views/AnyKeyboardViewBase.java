@@ -404,7 +404,7 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
             // UP - the single pointer has been lifted. So now we have no pointers down.
             // DOWN - this is the first action from the single pointer, so we already were in
             // no-pointers down state.
-            final int action = MotionEventCompat.getActionMasked(motionEvent);
+            final int action = motionEvent.getActionMasked();
             if (motionEvent.getPointerCount() == 1
                     && (action == MotionEvent.ACTION_CANCEL
                             || action == MotionEvent.ACTION_DOWN
@@ -646,7 +646,6 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
             final int[] padding,
             final int localAttrId,
             final int remoteTypedArrayIndex) {
-        // CHECKSTYLE:OFF: missingswitchdefault
         switch (localAttrId) {
             case android.R.attr.background:
                 Drawable keyboardBackground = remoteTypedArray.getDrawable(remoteTypedArrayIndex);
@@ -841,7 +840,6 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
                 mTextCaseType = remoteTypedArray.getInt(remoteTypedArrayIndex, 0);
                 break;
         }
-        // CHECKSTYLE:ON: missingswitchdefault
         return true;
     }
 
@@ -944,6 +942,9 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
                 break;
             case R.attr.iconKeyImageInsert:
                 keyCode = KeyCodes.IMAGE_MEDIA_POPUP;
+                break;
+            case R.attr.iconKeyClearQuickTextHistory:
+                keyCode = KeyCodes.CLEAR_QUICK_TEXT_HISTORY;
                 break;
             default:
                 keyCode = 0;
@@ -1397,7 +1398,7 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
                                 + (key.width
                                                 - mKeyBackgroundPadding.left
                                                 - mKeyBackgroundPadding.right)
-                                        / 2;
+                                        / 2f;
                 final float textY;
                 // Some devices (mostly pre-Honeycomb, have issues with RTL text
                 // drawing.
@@ -1634,7 +1635,7 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
         }
         // these are dynamic keys
         setSpecialKeyIconOrLabel(KeyCodes.MODE_ALPHABET);
-        setSpecialKeyIconOrLabel(KeyCodes.MODE_SYMOBLS);
+        setSpecialKeyIconOrLabel(KeyCodes.MODE_SYMBOLS);
         setSpecialKeyIconOrLabel(KeyCodes.KEYBOARD_MODE_CHANGE);
 
         mTextWidthCache.clear();
@@ -1675,11 +1676,11 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
                 if (mKeyboard instanceof GenericKeyboard) {
                     return guessLabelForKey(KeyCodes.MODE_ALPHABET);
                 } else {
-                    return guessLabelForKey(KeyCodes.MODE_SYMOBLS);
+                    return guessLabelForKey(KeyCodes.MODE_SYMBOLS);
                 }
             case KeyCodes.MODE_ALPHABET:
                 return mNextAlphabetKeyboardName;
-            case KeyCodes.MODE_SYMOBLS:
+            case KeyCodes.MODE_SYMBOLS:
                 return mNextSymbolsKeyboardName;
             case KeyCodes.TAB:
                 return getContext().getText(R.string.label_tab_key);
@@ -1746,7 +1747,6 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
         Drawable icon = getDrawableForKeyCode(keyCode);
         // maybe a drawable state is required
         if (icon != null) {
-            // CHECKSTYLE:OFF: missingswitchdefault
             switch (keyCode) {
                 case KeyCodes.ENTER:
                     Logger.d(TAG, "Action key action ID is %d", mKeyboardActionType);
@@ -1784,7 +1784,6 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
                     }
                     break;
             }
-            // CHECKSTYLE:ON: missingswitchdefault
         }
         return icon;
     }
@@ -1938,7 +1937,7 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
     }
 
     protected PointerTracker getPointerTracker(@NonNull final MotionEvent motionEvent) {
-        final int index = MotionEventCompat.getActionIndex(motionEvent);
+        final int index = motionEvent.getActionIndex();
         final int id = motionEvent.getPointerId(index);
         return getPointerTracker(id);
     }
@@ -2049,7 +2048,6 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
             final int x,
             final int y,
             PointerTracker tracker) {
-        // CHECKSTYLE:OFF: missingswitchdefault
         switch (action) {
             case MotionEvent.ACTION_DOWN:
             case 0x00000005: // MotionEvent.ACTION_POINTER_DOWN:
@@ -2063,7 +2061,6 @@ public class AnyKeyboardViewBase extends View implements InputViewBinder, Pointe
                 onCancelEvent(tracker);
                 break;
         }
-        // CHECKSTYLE:ON: missingswitchdefault
     }
 
     protected void onDownEvent(PointerTracker tracker, int x, int y, long eventTime) {

@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.util.Pair;
-import androidx.preference.PreferenceManager;
 import com.anysoftkeyboard.dictionaries.ExternalDictionaryFactory;
 import com.anysoftkeyboard.dictionaries.prefsprovider.UserDictionaryPrefsProvider;
 import com.anysoftkeyboard.dictionaries.sqlite.AbbreviationsDictionary;
@@ -15,26 +14,33 @@ import com.anysoftkeyboard.prefs.backup.PrefItem;
 import com.anysoftkeyboard.prefs.backup.PrefsProvider;
 import com.anysoftkeyboard.prefs.backup.PrefsRoot;
 import com.anysoftkeyboard.prefs.backup.PrefsXmlStorage;
-import com.menny.android.anysoftkeyboard.AnyApplication;
 import com.menny.android.anysoftkeyboard.R;
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
-import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class GlobalPrefsBackup {
     public static final String GLOBAL_BACKUP_FILENAME = "AnySoftKeyboardPrefs.xml";
 
-    private static File customFilename = null;
+    public static List<ProviderDetails> getAllAutoApplyPrefsProviders(@NonNull Context context) {
+        return Collections.singletonList(
+                new ProviderDetails(
+                        new RxSharedPrefs.SharedPrefsProvider(
+                                DirectBootAwareSharedPreferences.create(context)),
+                        R.string.shared_prefs_provider_name));
+    }
 
     public static List<ProviderDetails> getAllPrefsProviders(@NonNull Context context) {
         return Arrays.asList(
                 new ProviderDetails(
                         new RxSharedPrefs.SharedPrefsProvider(
-                                PreferenceManager.getDefaultSharedPreferences(context)),
+                                DirectBootAwareSharedPreferences.create(context)),
                         R.string.shared_prefs_provider_name),
                 new ProviderDetails(
                         new UserDictionaryPrefsProvider(context),
@@ -87,22 +93,30 @@ public class GlobalPrefsBackup {
 
     @NonNull
     public static Observable<ProviderDetails> backup(
-            @NonNull Context context, Pair<List<ProviderDetails>, Boolean[]> enabledProviders) {
+            Pair<List<ProviderDetails>, Boolean[]> enabledProviders,
+            @NonNull OutputStream outputFile) {
         return doIt(
-                context,
                 enabledProviders,
                 s -> new PrefsRoot(1),
                 GlobalPrefsBackup::backupProvider,
-                PrefsXmlStorage::store);
+                (storage, root) -> {
+                    try (outputFile) {
+                        storage.store(root, outputFile);
+                    }
+                });
     }
 
     @NonNull
     public static Observable<ProviderDetails> restore(
-            @NonNull Context context, Pair<List<ProviderDetails>, Boolean[]> enabledProviders) {
+            Pair<List<ProviderDetails>, Boolean[]> enabledProviders,
+            @NonNull InputStream inputFile) {
         return doIt(
-                context,
                 enabledProviders,
-                PrefsXmlStorage::load,
+                s -> {
+                    try (inputFile) {
+                        return s.load(inputFile);
+                    }
+                },
                 GlobalPrefsBackup::restoreProvider,
                 (s, p) -> {
                     /*no-op*/
@@ -111,7 +125,6 @@ public class GlobalPrefsBackup {
 
     @NonNull
     public static Observable<ProviderDetails> doIt(
-            @NonNull Context context,
             Pair<List<ProviderDetails>, Boolean[]> enabledProviders,
             Function<PrefsXmlStorage, PrefsRoot> prefsRootFactory,
             BiConsumer<PrefsProvider, PrefsRoot> providerAction,
@@ -125,7 +138,7 @@ public class GlobalPrefsBackup {
                         .filter(pair -> pair.second)
                         .map(pair -> pair.first);
 
-        final PrefsXmlStorage storage = new PrefsXmlStorage(getBackupFile(context));
+        final PrefsXmlStorage storage = new PrefsXmlStorage();
 
         return Observable.using(
                 () -> prefsRootFactory.apply(storage),
@@ -136,23 +149,6 @@ public class GlobalPrefsBackup {
                                     return providerDetails;
                                 }),
                 prefsRoot -> prefsRootFinalizer.accept(storage, prefsRoot));
-    }
-
-    public static void updateCustomFilename(File filename) {
-        customFilename = filename;
-    }
-
-    public static File getBackupFile(@NonNull Context context) {
-        File tempFilename;
-
-        if (customFilename == null) {
-            return AnyApplication.getBackupFile(context, GLOBAL_BACKUP_FILENAME);
-        } else {
-            // We reset the customFilename
-            tempFilename = customFilename;
-            customFilename = null;
-            return tempFilename;
-        }
     }
 
     public static class ProviderDetails {

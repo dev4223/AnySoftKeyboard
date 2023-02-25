@@ -16,10 +16,12 @@ import com.anysoftkeyboard.keyboards.Keyboard;
 import com.anysoftkeyboard.rx.TestRxSchedulers;
 import com.anysoftkeyboard.test.SharedPrefsHelper;
 import com.menny.android.anysoftkeyboard.R;
+import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.robolectric.annotation.Config;
 
@@ -119,6 +121,104 @@ public class AnySoftKeyboardGimmicksTest extends AnySoftKeyboardBaseTest {
     }
 
     @Test
+    public void testSwitchesFromSymbolsToAlphabetOnSpaceAfterSymbolUsed() {
+        Assert.assertEquals(
+                "c7535083-4fe6-49dc-81aa-c5438a1a343a",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress('1');
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "c7535083-4fe6-49dc-81aa-c5438a1a343a",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        Assert.assertEquals("1 ", mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+    }
+
+    @Test
+    public void testSticksInSymbolsUntilSymbolPressed() {
+        Assert.assertEquals(
+                "c7535083-4fe6-49dc-81aa-c5438a1a343a",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress('1');
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        Assert.assertEquals(" 1", mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "c7535083-4fe6-49dc-81aa-c5438a1a343a",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        Assert.assertEquals(" 1 ", mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+    }
+
+    @Test
+    public void testSticksInSymbolsUntilSymbolPressedDouble() {
+        Assert.assertEquals(
+                "c7535083-4fe6-49dc-81aa-c5438a1a343a",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress('1');
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "c7535083-4fe6-49dc-81aa-c5438a1a343a",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        Assert.assertEquals(". 1 ", mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+    }
+
+    @Test
+    public void testSticksInSymbolsWhenSettingIsDisabled() {
+        SharedPrefsHelper.setPrefsValue(R.string.settings_key_switch_keyboard_on_space, false);
+        Assert.assertEquals(
+                "c7535083-4fe6-49dc-81aa-c5438a1a343a",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress('1');
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.SPACE);
+        Assert.assertEquals(
+                "symbols_keyboard",
+                mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardId());
+        Assert.assertEquals(" 1 ", mAnySoftKeyboardUnderTest.getCurrentInputConnectionText());
+    }
+
+    @Test
     public void testManualPickWordAndAnotherSpaceAndBackspace() {
         mAnySoftKeyboardUnderTest.simulateTextTyping("h");
         mAnySoftKeyboardUnderTest.simulateTextTyping("e");
@@ -150,6 +250,85 @@ public class AnySoftKeyboardGimmicksTest extends AnySoftKeyboardBaseTest {
 
         mAnySoftKeyboardUnderTest.simulateKeyPress('h');
         Assert.assertEquals("hello. h", inputConnection.getCurrentTextInInputConnection());
+    }
+
+    @Test
+    public void testVerifyVariousPunctuationsSwapping() {
+        TestInputConnection inputConnection = getCurrentTestInputConnection();
+
+        final var symbolsToVerify = Arrays.asList('.', ',', ':', ';', '?', '!', ')');
+
+        final var expected = new StringBuilder();
+
+        for (char punc : symbolsToVerify) {
+            mAnySoftKeyboardUnderTest.simulateTextTyping("hel");
+            verifySuggestions(true, "hel", "he'll", "hello", "hell");
+
+            mAnySoftKeyboardUnderTest.pickSuggestionManually(2, "hello");
+            expected.append("hello ");
+            Assert.assertEquals(
+                    expected.toString(), inputConnection.getCurrentTextInInputConnection());
+            // typing punctuation
+            mAnySoftKeyboardUnderTest.simulateKeyPress(punc);
+            expected.setLength(expected.length() - 1);
+            expected.append(punc).append(' ');
+            Assert.assertEquals(
+                    expected.toString(), inputConnection.getCurrentTextInInputConnection());
+        }
+    }
+
+    @Test
+    public void testVerifyVariousPunctuationsSwappingFromOtherKeyboard() {
+        TestInputConnection inputConnection = getCurrentTestInputConnection();
+
+        final var symbolsToVerify = Arrays.asList('.', ':', '?', '!', ')');
+
+        final var expected = new StringBuilder();
+
+        for (char punc : symbolsToVerify) {
+            mAnySoftKeyboardUnderTest.simulateTextTyping("hel");
+            verifySuggestions(true, "hel", "he'll", "hello", "hell");
+
+            mAnySoftKeyboardUnderTest.pickSuggestionManually(2, "hello");
+            expected.append("hello ");
+            Assert.assertEquals(
+                    expected.toString(), inputConnection.getCurrentTextInInputConnection());
+            // switching to symbols
+            mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
+            Assert.assertNotNull(mAnySoftKeyboardUnderTest.findKeyWithPrimaryKeyCode(punc));
+            // typing punctuation
+            mAnySoftKeyboardUnderTest.simulateKeyPress(punc);
+            expected.setLength(expected.length() - 1);
+            expected.append(punc).append(' ');
+            Assert.assertEquals(
+                    expected.toString(), inputConnection.getCurrentTextInInputConnection());
+            // switching to alphabet
+            mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_ALPHABET);
+        }
+    }
+
+    @Test
+    public void testVerifyVariousPunctuationsDoNotSwap() {
+        TestInputConnection inputConnection = getCurrentTestInputConnection();
+
+        final var symbolsToVerify = Arrays.asList('\'', '\"', '(');
+
+        final var expected = new StringBuilder();
+
+        for (char punc : symbolsToVerify) {
+            mAnySoftKeyboardUnderTest.simulateTextTyping(" hel");
+            verifySuggestions(true, "hel", "he'll", "hello", "hell");
+
+            mAnySoftKeyboardUnderTest.pickSuggestionManually(2, "hello");
+            expected.append(" hello ");
+            Assert.assertEquals(
+                    expected.toString(), inputConnection.getCurrentTextInInputConnection());
+            // typing punctuation
+            mAnySoftKeyboardUnderTest.simulateKeyPress(punc);
+            expected.append(punc);
+            Assert.assertEquals(
+                    expected.toString(), inputConnection.getCurrentTextInInputConnection());
+        }
     }
 
     @Test
@@ -305,6 +484,26 @@ public class AnySoftKeyboardGimmicksTest extends AnySoftKeyboardBaseTest {
         Mockito.verify(inputConnection).commitText("\n", 1);
         // and never the key-events
         Mockito.verify(inputConnection, Mockito.never()).sendKeyEvent(Mockito.any(KeyEvent.class));
+    }
+
+    @Test
+    public void testShiftEnterSendsNewLine() {
+        TestInputConnection inputConnection = getCurrentTestInputConnection();
+        mAnySoftKeyboardUnderTest.simulateTextTyping("this is a test");
+        mAnySoftKeyboardUnderTest.onPress(KeyCodes.SHIFT);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.ENTER);
+        mAnySoftKeyboardUnderTest.simulateTextTyping("this is a test\n");
+        InOrder inOrder = Mockito.inOrder(inputConnection);
+        inOrder.verify(inputConnection).beginBatchEdit();
+        inOrder.verify(inputConnection).commitText("this", 1);
+        inOrder.verify(inputConnection).commitText("is", 1);
+        inOrder.verify(inputConnection).commitText("a", 1);
+        // test is not committed, it is just done composing.
+        inOrder.verify(inputConnection, Mockito.never())
+                .commitText(Mockito.eq("test"), Mockito.anyInt());
+        inOrder.verify(inputConnection).finishComposingText();
+        inOrder.verify(inputConnection).commitText("\n", 1);
+        inOrder.verify(inputConnection).endBatchEdit();
     }
 
     @Test

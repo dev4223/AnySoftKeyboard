@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.anysoftkeyboard.ime.InputViewActionsProvider;
@@ -36,9 +35,11 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
     private Drawable mBackspaceIcon;
     private Drawable mSettingsIcon;
     private Drawable mMediaInsertionDrawable;
+    private Drawable mDeleteRecentlyUsedDrawable;
     private int mBottomPadding;
     private QuickKeyHistoryRecords mQuickKeyHistoryRecords;
     private DefaultSkinTonePrefTracker mDefaultSkinTonePrefTracker;
+    private DefaultGenderPrefTracker mDefaultGenderPrefTracker;
 
     public QuickTextPagerView(Context context) {
         super(context);
@@ -52,13 +53,6 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
         super(context, attrs, defStyleAttr);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public QuickTextPagerView(
-            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    @RequiresApi(Build.VERSION_CODES.GINGERBREAD_MR1)
     private static void setupSlidingTab(
             View rootView,
             float tabTitleTextSize,
@@ -86,6 +80,7 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
             Drawable settingsIcon,
             Drawable keyboardDrawable,
             Drawable mediaInsertionDrawable,
+            Drawable deleteRecentlyUsedDrawable,
             int bottomPadding,
             Set<MediaType> supportedMediaTypes) {
         mKeyboardTheme = keyboardTheme;
@@ -95,13 +90,13 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
         mBackspaceIcon = backspaceIcon;
         mSettingsIcon = settingsIcon;
         mMediaInsertionDrawable = mediaInsertionDrawable;
+        mDeleteRecentlyUsedDrawable = deleteRecentlyUsedDrawable;
         mBottomPadding = bottomPadding;
         findViewById(R.id.quick_keys_popup_quick_keys_insert_media)
                 .setVisibility(supportedMediaTypes.isEmpty() ? View.GONE : VISIBLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             setBackground(keyboardDrawable);
         } else {
-            //noinspection deprecation
             setBackgroundDrawable(keyboardDrawable);
         }
     }
@@ -123,8 +118,8 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
 
         final QuickTextUserPrefs quickTextUserPrefs = new QuickTextUserPrefs(context);
 
-        ViewPagerWithDisable pager = findViewById(R.id.quick_text_keyboards_pager);
-        PagerAdapter adapter =
+        final ViewPagerWithDisable pager = findViewById(R.id.quick_text_keyboards_pager);
+        final QuickKeysKeyboardPagerAdapter adapter =
                 new QuickKeysKeyboardPagerAdapter(
                         context,
                         pager,
@@ -132,9 +127,12 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
                         new RecordHistoryKeyboardActionListener(
                                 historyQuickTextKey, keyboardActionListener),
                         mDefaultSkinTonePrefTracker,
+                        mDefaultGenderPrefTracker,
                         mKeyboardTheme,
                         mBottomPadding);
 
+        final ImageView clearEmojiHistoryIcon =
+                findViewById(R.id.quick_keys_popup_delete_recently_used_smileys);
         ViewPager.SimpleOnPageChangeListener onPageChangeListener =
                 new ViewPager.SimpleOnPageChangeListener() {
                     @Override
@@ -142,6 +140,10 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
                         super.onPageSelected(position);
                         QuickTextKey selectedKey = list.get(position);
                         quickTextUserPrefs.setLastSelectedAddOnId(selectedKey.getId());
+                        // if this is History, we need to show clear icon
+                        // else, hide the clear icon
+                        clearEmojiHistoryIcon.setVisibility(
+                                position == 0 ? View.VISIBLE : View.GONE);
                     }
                 };
         int startPageIndex = quickTextUserPrefs.getStartPageIndex(list);
@@ -161,6 +163,7 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
                 .setImageDrawable(mBackspaceIcon);
         ((ImageView) findViewById(R.id.quick_keys_popup_quick_keys_insert_media))
                 .setImageDrawable(mMediaInsertionDrawable);
+        clearEmojiHistoryIcon.setImageDrawable(mDeleteRecentlyUsedDrawable);
         ((ImageView) findViewById(R.id.quick_keys_popup_quick_keys_settings))
                 .setImageDrawable(mSettingsIcon);
         final View actionsLayout = findViewById(R.id.quick_text_actions_layout);
@@ -176,8 +179,10 @@ public class QuickTextPagerView extends LinearLayout implements InputViewActions
         mQuickKeyHistoryRecords = quickKeyHistoryRecords;
     }
 
-    public void setDefaultSkinTonePrefTracker(
-            DefaultSkinTonePrefTracker defaultSkinTonePrefTracker) {
+    public void setEmojiVariantsPrefTrackers(
+            DefaultSkinTonePrefTracker defaultSkinTonePrefTracker,
+            DefaultGenderPrefTracker defaultGenderPrefTracker) {
         mDefaultSkinTonePrefTracker = defaultSkinTonePrefTracker;
+        mDefaultGenderPrefTracker = defaultGenderPrefTracker;
     }
 }

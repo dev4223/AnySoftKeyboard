@@ -34,6 +34,7 @@ public class QuickKeysKeyboardPagerAdapterTest {
     private List<QuickTextKey> mOrderedEnabledQuickKeys;
     private OnKeyboardActionListener mKeyboardListener;
     private DefaultSkinTonePrefTracker mSkinTonePrefTracker;
+    private DefaultGenderPrefTracker mGenderTracker;
 
     @Before
     public void setup() {
@@ -42,6 +43,7 @@ public class QuickKeysKeyboardPagerAdapterTest {
                 AnyApplication.getQuickTextKeyFactory(getApplicationContext()).getEnabledAddOns();
         mKeyboardListener = Mockito.mock(OnKeyboardActionListener.class);
         mSkinTonePrefTracker = Mockito.mock(DefaultSkinTonePrefTracker.class);
+        mGenderTracker = Mockito.mock(DefaultGenderPrefTracker.class);
         mUnderTest =
                 new QuickKeysKeyboardPagerAdapter(
                         getApplicationContext(),
@@ -49,6 +51,7 @@ public class QuickKeysKeyboardPagerAdapterTest {
                         mOrderedEnabledQuickKeys,
                         mKeyboardListener,
                         mSkinTonePrefTracker,
+                        mGenderTracker,
                         AnyApplication.getKeyboardThemeFactory(getApplicationContext())
                                 .getEnabledAddOn(),
                         11);
@@ -75,8 +78,9 @@ public class QuickKeysKeyboardPagerAdapterTest {
         Assert.assertTrue(instance0 instanceof ScrollViewWithDisable);
         Assert.assertEquals(1, container.getChildCount());
         Assert.assertSame(instance0, container.getChildAt(0));
-        //noinspection ResultOfMethodCallIgnored
+        //noinspection
         Mockito.verify(mSkinTonePrefTracker).getDefaultSkinTone();
+        Mockito.verify(mGenderTracker).getDefaultGender();
 
         final QuickKeysKeyboardView keyboardView0 =
                 ((View) instance0).findViewById(R.id.keys_container);
@@ -99,7 +103,8 @@ public class QuickKeysKeyboardPagerAdapterTest {
         final QuickKeysKeyboardView keyboardView0Again =
                 ((View) instance0Again).findViewById(R.id.keys_container);
         Assert.assertNotNull(keyboardView0Again);
-        Assert.assertSame(keyboardView0.getKeyboard(), keyboardView0Again.getKeyboard());
+        // the history is always recreated!
+        Assert.assertNotSame(keyboardView0.getKeyboard(), keyboardView0Again.getKeyboard());
         // making sure the keyboard DOES NOT have a background - this is because we want the
         // background to be used in the pager container.
         Assert.assertNull(keyboardView0.getBackground());
@@ -107,6 +112,16 @@ public class QuickKeysKeyboardPagerAdapterTest {
 
         // adds padding
         Assert.assertEquals(11, ((View) instance0).getPaddingBottom());
+
+        // the other views (not history) ARE NOT RECREATED!
+        Object instance1Again = mUnderTest.instantiateItem(container, 1);
+        Assert.assertNotNull(instance1Again);
+        Assert.assertNotSame(instance1, instance1Again);
+        final QuickKeysKeyboardView keyboardView1Again =
+                ((View) instance1Again).findViewById(R.id.keys_container);
+        Assert.assertNotNull(keyboardView1Again);
+        // non history is not recreated!
+        Assert.assertSame(keyboardView1.getKeyboard(), keyboardView1Again.getKeyboard());
     }
 
     @Test

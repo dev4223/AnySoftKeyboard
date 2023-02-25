@@ -38,6 +38,7 @@
     </string>
     <string name="hint_add_to_dictionary">\u2190 Дакраніцеся зноў, каб захаваць</string>
     <string name="hint_double_tap_to_close">Яшчэ раз, каб выдаліць прапановы</string>
+    <string name="hint_click_for_inline_suggestions">Даступны прапановы аўтаматычнага запаўнення</string>
     <!-- voice -->
     <string name="voice_input_not_installed_title">Галасавы ўвод не ўсталяваны</string>
     <string name="voice_input_not_installed_text">Галасавы ўвод Google не ўсталяваны на вашай прыладзе.\nГэту праблему можна лёгка вырашыць спампаваўшы патрэбны файл з <i>Google Play</i>.</string>
@@ -55,6 +56,9 @@
     <string name="effects_group">Эфекты</string>
     <string name="ime_settings">Налады клавіятуры</string>
     <string name="switch_incognito">Рэжым інкогніта</string>
+    <string name="use_system_vibration_title">Выкарыстоўваць сістэмную вібрацыю</string>
+    <string name="use_system_vibration_off_summary">Выкарыстоўваць уласныя налады вібрацыі</string>
+    <string name="use_system_vibration_on_summary">Выкарыстоўваць сістэмныя налады вібрацыі Android</string>
     <string name="vibrate_on_key_press_title">Вібрыраваць падчас націску клавішаў</string>
     <string name="vibrate_on_key_press_value_template">Мілісекунд: %d</string>
     <string name="night_mode_screen">Налады начнога рэжыму</string>
@@ -188,6 +192,7 @@
     <string name="swipe_action_name_compact_layout_to_right">Кампактная клавіятура для правай рукі</string>
     <string name="swipe_action_name_compact_layout_to_left">Кампактная клавіятура для левай рукі</string>
     <string name="swipe_action_name_utility_keyboard">Паказваць утыліту клавіятуры</string>
+    <string name="swipe_action_name_quick_text_popup">Паказаць акно з эмоджы</string>
     <string name="settings_swipe_velocity_threshold_title">Мяжа хуткасці правядзення пальцам</string>
     <string name="settings_swipe_velocity_threshold_summary">Мінімальная хуткасць жэсту. У дадзены час: %s</string>
     <string name="settings_swipe_velocity_very_slow">Вельмі марудна</string>
@@ -249,7 +254,6 @@
     <string name="supported_keyboard_row_modes_title">Уключаныя спецыялізаваныя рэжымы поля ўводу</string>
     <string name="supported_keyboard_row_modes_summary">Для выкарыстання выберыце спецыялізаваныя радкі поля ўводу (такія як, паролі, спасылкі і г.д.).</string>
     <string name="tweak_dictionary_group">Налады слоўніка</string>
-    <string name="settings_min_length_for_word_correction">Мінімальная даўжыня слова для выпраўлення</string>
     <string name="show_keyboard_name_text">Паказваць імя клавіятуры</string>
     <string name="show_keyboard_name_on_summary">Паказваць імя клавіятуры на клавішы прабел</string>
     <string name="show_keyboard_name_off_summary">Ніколі не паказваць назву клавіятуры</string>
@@ -415,6 +419,7 @@
     <string name="extension_kbd_bottom_minimal">Мінімалістычны</string>
     <string name="extension_kbd_bottom_minimal_no_emoji">Мінімалістычны (без эмодзі)</string>
     <string name="extension_kbd_bottom_minimal_less_punctuation">Мінімальны (менш пунктуацыі)</string>
+    <string name="extension_kbd_bottom_minimal_alt">Мінімалістычны (альтэрнатыўны)</string>
     <!-- Tutorials -->
     <!-- Special soft keyboard keys text -->
     <string name="label_go_key">Пачаць</string>
@@ -493,20 +498,6 @@
     <!-- User dictionary settings. The title of the dialog to edit an existing word in the user dictionary. -->
     <!-- User dictionary settings. The text to show when there are no user-defined words in the dictionary -->
     <string name="user_dict_settings_empty_text">Слоўнік карыстальніка пусты. Зараз можна дадаць першае слова.</string>
-    <string name="user_dict_backup_success_title">Рэзервовае капіяванне зроблена!</string>
-    <string name="user_dict_backup_success_text">Вашы словы паспяхова захаваныя на прыладзе ў
-        /Android/data/com.menny.android.anysoftkeyboard/files/
-    </string>
-    <string name="user_dict_backup_fail_title">Збой рэзервовага капіявання!</string>
-    <string name="user_dict_backup_fail_text_with_error">Не атрымалася захаваць словы з-за:
-        <xliff:g id="error">%s</xliff:g>
-    </string>
-    <string name="user_dict_restore_success_title">Паспяхова адноўлена!</string>
-    <string name="user_dict_restore_success_text">Вашы словы паспяхова адноўленыя.</string>
-    <string name="user_dict_restore_fail_title">Не атрымалася аднавіць!</string>
-    <string name="user_dict_restore_fail_text_with_error">Не атрымалася аднавіць словы з-за:
-        <xliff:g id="error">%s</xliff:g>
-    </string>
     <string name="should_swap_punctuation_and_space_title">Замяніць пунктуацыю і прабел</string>
     <string name="should_swap_punctuation_and_space_off_summary">Не замяняць прабел і пунктуацыю.</string>
     <string name="should_swap_punctuation_and_space_on_summary">Замяняць аўтаматычны прабел і пунктуацыю.</string>
@@ -524,6 +515,12 @@
     <string name="emoji_default_skin_tone_value_type_5">Умерана-цёмны колер вокладкі</string>
     <string name="emoji_default_skin_tone_value_type_6">Цёмны колер вокладкі</string>
     <string name="emoji_default_skin_tone_value_random_type">Адвольны колер вокладкі</string>
+    <string name="emoji_default_gender_title">Стандартны пол эмодзі</string>
+    <string name="emoji_default_gender_summary">Стандартны пол: %s</string>
+    <string name="emoji_default_gender_value_person">Асоба</string>
+    <string name="emoji_default_gender_value_woman">Жанчына</string>
+    <string name="emoji_default_gender_value_man">Мужчына</string>
+    <string name="emoji_default_gender_value_random_type">Адвольны пол</string>
     <string name="developer_tools">Інструменты распрацоўшчыка</string>
     <string name="click_for_developer_features">Інструменты распрацоўшчыка</string>
     <string name="click_for_developer_features_summary">Разнастайныя інструменты для распрацоўшчыкаў AnySoftKeyboard</string>
@@ -546,16 +543,6 @@
     <string name="enter_abbreviation_hint">Абрэвіятура</string>
     <string name="enter_abbreviation_target_hint">Поўны сказ</string>
     <string name="toast_error_custom_path_backup">Памылка: Любая кантэкстная праграма можа быць адкрытая</string>
-    <string name="file_explorer_menu_add_folder">Стварыць папку</string>
-    <string name="file_explorer_filename">Назва файла рэзервовай копіі...</string>
-    <string name="file_explorer_filename_empty">Назва файла не можа быць пустой...</string>
-    <string name="file_explorer_alert_title">Выбраць гэты файл?</string>
-    <string name="file_explorer_restore_alert_message">Вы хочаце аднавіць гэты файл?</string>
-    <string name="file_explorer_backup_alert_message">Гэты файл будзе перазапісаны.</string>
-    <string name="file_explorer_backup_success">Вашы даныя былі захаваныя ў\u0020</string>
-    <string name="file_explorer_backup_failed">Не атрымалася захаваць даныя.</string>
-    <string name="file_explorer_restore_success">Вашы даныя адноўленыя з\u0020</string>
-    <string name="file_explorer_restore_failed">Памылка аднаўлення вашых даных.</string>
     <string name="about_additional_software_licenses">Дадатковыя ліцэнзіі</string>
     <string name="setup_wizard_step_one_title">Уключыць AnySoftKeyboard</string>
     <string name="setup_wizard_step_one_details">На гэтым кроку вам неабходна будзе актываваць <i>AnySoftKeyboard</i>. Калі ласка, уключыце <i>\'AnySoftKeyboard\'</i> у раздзеле <i>Налады мовы і ўводу</i>.</string>
@@ -594,6 +581,7 @@
     <string name="clipboard_paste_entries_title">Выберыце тэкст, каб уставіць</string>
     <string name="next_word_prefs_clear_data">Ачысціць даныя наступнага слова</string>
     <string name="next_word_prefs_clear_data_summary">Гэта аперацыя незваротная. Уся ваша гісторыя набору будзе ачышчаная.</string>
+    <string name="storage_permission_rationale">Праграма патрабуе ваш дазвол на чытанне і запіс рэзервовых копій вашых файлаў.</string>
     <string name="notification_read_contacts_title">Ці можна прачытаць вашы кантакты?</string>
     <string name="notification_read_contacts_text">Нам неабходна прачытаць вашы кантакты, каб даць вам магчымасць яшчэ лепш выкарыстоўваць аўтазапаўненне.</string>
     <string name="notification_read_contacts_ticker">Неабходны дазвол на доступ да кантактаў</string>
@@ -618,7 +606,7 @@
     <string name="app_shortcut_quick_keys_short_label">Налады эмодзі</string>
     <string name="extension_keyboard_enabled_off_summary">Пашыраная клавіятура адключаная.</string>
     <string name="extension_keyboard_enabled_on_summary">Пашыраная клавіятура з\'явіцца пры чырканні уверх над клавіятурай.</string>
-    <string name="read_our_privacy_policy">Азнаёмцеся з нашай палітыкай прыватнасці...</string>
+    <string name="read_our_privacy_policy">Азнаёмцеся з нашай палітыкай прыватнасці…</string>
     <string name="visit_our_web_site">Наведайце нашу старонку…</string>
     <string name="keyboard_for_url_fields">Раскладка для радкоў з URL-адрасамі</string>
     <string name="keyboard_for_url_fields_summary">Падчас запаўнення радкоў з URL ці з адрасамі электроннай пошты будзе выкарыстана гэта раскладка. У дадзены час: %s</string>
@@ -632,6 +620,7 @@
     <string name="setup_wizard_welcome_start_action">Запуск усталявання…</string>
     <string name="setup_wizard_welcome_info_footnote">* Вядома, што AnySoftKeyboard не ўяўляе ніякай небяспекі. Вы можаце пераканацца ў гэтым зазірнуўшы ў зыходны код праграмы. Больш за тое, праграма не патрабуе <i>СЕЦІЎНЫХ</i> дазволаў, г. зн. што яна нікуды не адпраўляе даныя з вашай прылады.</string>
     <string name="setup_wizard_welcome_privacy_action">Пераход да палітыкі прыватнасці…</string>
+    <string name="setup_wizard_skip">Прапусціць</string>
     <string name="clear_all_dictionary_override">Ачысціць перавызначэнні</string>
     <string name="theme_case_type_override_dialog_title">Выбраць перавызначэнне рэгістра літар</string>
     <string name="theme_case_type_override_theme">Выкарыстоўваць тэму</string>
@@ -659,7 +648,6 @@
     <string name="prefs_providers_backed_up_to">Даныя былі паспяхова зарэзерваваныя ў %s</string>
     <string name="prefs_providers_failed_restore_due_to">Не атрымалася выканаць аднаўленне даных з-за %s</string>
     <string name="prefs_providers_restored_to">Даныя былі паспяхова адноўленыя ў %s</string>
-    <string name="word_editor_action_choose_path">Выберыце ўласны шлях</string>
     <string name="allow_layouts_to_provide_generic_rows">Клавіятура можа забяспечыць агульны рад</string>
     <string name="allow_layouts_to_provide_generic_rows_off_summary">Заўсёды выкарыстоўваць выбраны агульны рад.</string>
     <string name="allow_layouts_to_provide_generic_rows_on_summary">Дазваляць раскладцы перавызначаць агульны рад.</string>
@@ -669,6 +657,7 @@
     <string name="gesture_typing_alert_title">Функцыя знаходзіцца ў рэжыме BETA!</string>
     <string name="gesture_typing_alert_message">Функцыя ўвода жэстамі➿ знаходзіцца на стадыі <b>beta</b>-тэсціравання і можа працаваць нестабільна.\nАле пры жаданні вы можаце паспрабаваць яе.</string>
     <string name="gesture_typing_alert_button">Зразумела</string>
+    <string name="undo_gesture_typing">Адрабіць друк жэстамі</string>
     <string name="apply_remote_app_colors_to_theme">Змяніць колеры тэмы ў адпаведнасці з бягучай праграмай</string>
     <string name="apply_overlay_summary_on">Колеры клавіятуры будуць адпавядаць актыўнай праграме (калі магчыма).</string>
     <string name="apply_overlay_summary_off">Заўсёды выкарыстоўваць колеры тэмы.</string>
@@ -681,5 +670,8 @@
     <string name="app_share_menu_title">Парайце AnySoftKeyboard іншым</string>
     <string name="app_share_text">Я хачу параіць вам экранную клавіятуру для Android адметнымі рысамі якой з\'яўляюцца: адкрытасць зыходнага кода, бясплатнае распаўсюджанне, падтрымка ўводу амаль на ўсіх мовах свету, клопат пра прыватнасць вашых даных, тонкая настройка пад вашы задачы. \nАтрымаць па спасылцы ў Play Store:\nhttps://play.google.com/store/apps/details?id=com.menny.android.anysoftkeyboard\nF-Droid: https://f-droid.org/en/packages/com.menny.android.anysoftkeyboard/</string>
     <string name="click_me_for_easter_egg_info">націсні на мяне для сюрпрызу</string>
-    <!-- this URL should be localized - it should point to a web-site with information in the locale language. -->
+    <string name="backup_restore_not_support_before_kitkat">Не падтрымліваецца ў вашай версіі Android</string>
+    <string name="backup_restore_not_support_before_kitkat_message">Рэзервовая копія і аднаўленне не падтрымліваюцца для прылад з аперацыйнай сістэмай Android версіі ранейшай за KitKat (версія 4.4). Выбачаемся.</string>
+    <string name="delete_all_clipboard_entries">Ачысціць буфер абмену</string>
+    <string name="tip_swipe_from_backspace_to_clear">Парада: чырканнем у левы бок ад прабелу вы можаце ачысціць слова!</string>
 </resources>

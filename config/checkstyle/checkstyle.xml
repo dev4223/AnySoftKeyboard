@@ -37,7 +37,19 @@
         <module name="RegexpSinglelineJava">
             <property name="id" value="EasyPermissionOnlyUsingHelper" />
             <property name="format" value="EasyPermissions" />
-            <property name="message" value="User PermissionRequestHelper!" />
+            <property name="message" value="Use PermissionRequestHelper!" />
+        </module>
+
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="NeverUseConfigNEWEST_SDK" />
+            <property name="format" value="Config.NEWEST_SDK" />
+            <property name="message" value="Using Config.NEWEST_SDK may refer to an unstable API. Use com.anysoftkeyboard.test.TestUtils.NEWEST_STABLE_API_LEVEL" />
+        </module>
+
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="DoNotRegisterContentObserverDirectly" />
+            <property name="format" value="registerContentObserver" />
+            <property name="message" value="Do not use registerContentObserver/unregisterContentObserver. Use RxContentResolver instead." />
         </module>
 
         <module name="RegexpSinglelineJava">
@@ -122,6 +134,13 @@
         </module>
 
         <module name="RegexpSinglelineJava">
+            <property name="id" value="DoNotUseShadowSystemClockForTime" />
+            <property name="format" value="ShadowSystemClock.currentTimeMillis()" />
+            <property name="message"
+                value="Using ShadowSystemClock is funky. Use SystemClock.uptimeMillis()." />
+        </module>
+
+        <module name="RegexpSinglelineJava">
             <property name="id" value="DoNotUseAsyncTask" />
             <property name="format" value="\W+AsyncTask\W+" />
             <property name="message" value="Do not use AsyncTask, use RXJava instead" />
@@ -137,6 +156,12 @@
             <property name="id" value="DoNotUseThreadDump" />
             <property name="format" value="Thread\.dumpStack" />
             <property name="message" value="Do not use dumpStack method, is looks like debug code." />
+        </module>
+
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="DoNotUsePreferenceManager" />
+            <property name="format" value="getDefaultSharedPreferences" />
+            <property name="message" value="Do not use this. Use DirectBootAwareSharedPreferences.create(Context) instead." />
         </module>
 
         <module name="RegexpSinglelineJava">
@@ -159,9 +184,7 @@
 
         <module name="MultipleVariableDeclarations" />
         <module name="ArrayTypeStyle" />
-        <module name="MissingSwitchDefault" />
         <module name="DefaultComesLast" />
-        <module name="FallThrough" />
         <module name="UpperEll" />
         <module name="ModifierOrder" />
         <module name="EmptyLineSeparator">
@@ -244,6 +267,7 @@
 
         <!-- allows suppressing using the //CHECKSTYLE:ON //CHECKSTYLE:OFF -->
         <module name="SuppressionCommentFilter" />
+
     </module>
 
     <module name="NewlineAtEndOfFile">

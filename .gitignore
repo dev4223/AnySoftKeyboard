@@ -23,6 +23,7 @@ app/release/
 .settings/
 .classpath
 .vscode/
+bin/
 
 #generated files
 *_words_*.dict
@@ -41,3 +42,7 @@ build-logging/
 **/src/*/play/release-notes/*/production.txt
 
 addons/.generated_pack_version
+
+#node.js npm
+node_modules
+

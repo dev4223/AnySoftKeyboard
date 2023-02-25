@@ -89,6 +89,7 @@
     <bool name="settings_default_double_space_to_period">true</bool>
 
     <string name="settings_default_emoji_skin_tone">generic</string>
+    <string name="settings_default_emoji_gender">person</string>
 
     <bool name="settings_default_persistent_layout_per_package_id">true</bool>
 
@@ -114,12 +115,11 @@
     <string name="swipe_action_value_compact_layout_to_right">compact_to_right</string>
     <string name="swipe_action_value_compact_layout_to_left">compact_to_left</string>
     <string name="swipe_action_value_utility_keyboard">utility_keyboard</string>
+    <string name="swipe_action_value_quick_text_popup">quick_text_popup</string>
 
     <string name="settings_default_theme_case_type_override">theme</string>
 
     <string name="settings_key_hint_size_default">normal</string>
-
-    <integer name="settings_default_min_word_length_for_suggestion">2</integer>
 
     <string name="settings_default_power_save_mode_value">on_low_battery</string>
     <string name="settings_default_night_mode_value">never</string>
@@ -136,5 +136,7 @@
     <integer name="settings_default_notice_never_before_seen_times_value">0</integer>
 
     <bool name="settings_default_workaround_disable_rtl_fix">true</bool>
+
+    <bool name="settings_default_try_splitting_words_for_correction">true</bool>
 
 </resources>

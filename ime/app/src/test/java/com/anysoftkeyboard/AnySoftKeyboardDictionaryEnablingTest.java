@@ -219,7 +219,10 @@ public class AnySoftKeyboardDictionaryEnablingTest extends AnySoftKeyboardBaseTe
         Mockito.verify(mAnySoftKeyboardUnderTest.getSuggest()).closeDictionaries();
         Mockito.verify(mAnySoftKeyboardUnderTest.getSuggest())
                 .setCorrectionMode(
-                        Mockito.eq(false), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
+                        Mockito.eq(false),
+                        Mockito.anyInt(),
+                        Mockito.anyInt(),
+                        Mockito.anyBoolean());
 
         simulateOnStartInputFlow();
 
@@ -235,7 +238,7 @@ public class AnySoftKeyboardDictionaryEnablingTest extends AnySoftKeyboardBaseTe
 
         Mockito.verify(mAnySoftKeyboardUnderTest.getSuggest())
                 .setCorrectionMode(
-                        Mockito.eq(true), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt());
+                        Mockito.eq(true), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyBoolean());
 
         simulateOnStartInputFlow();
 
@@ -300,9 +303,7 @@ public class AnySoftKeyboardDictionaryEnablingTest extends AnySoftKeyboardBaseTe
     public void testSettingCorrectModeFromPrefs() {
         SharedPrefsHelper.setPrefsValue(
                 "settings_key_auto_pick_suggestion_aggressiveness", "minimal_aggressiveness");
-        Mockito.verify(mAnySoftKeyboardUnderTest.getSuggest()).setCorrectionMode(true, 1, 1, 2);
-        SharedPrefsHelper.setPrefsValue("settings_key_min_length_for_word_correction__", 4);
-        Mockito.verify(mAnySoftKeyboardUnderTest.getSuggest()).setCorrectionMode(true, 1, 1, 4);
+        Mockito.verify(mAnySoftKeyboardUnderTest.getSuggest()).setCorrectionMode(true, 1, 1, true);
     }
 
     @Test

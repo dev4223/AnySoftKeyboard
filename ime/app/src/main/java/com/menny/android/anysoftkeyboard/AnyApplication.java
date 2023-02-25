@@ -25,16 +25,20 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 import androidx.multidex.MultiDexApplication;
 import com.anysoftkeyboard.AnySoftKeyboard;
 import com.anysoftkeyboard.addons.AddOnsFactory;
 import com.anysoftkeyboard.android.NightMode;
 import com.anysoftkeyboard.base.utils.Logger;
 import com.anysoftkeyboard.base.utils.NullLogProvider;
+import com.anysoftkeyboard.chewbacca.ChewbaccaUncaughtExceptionHandler;
 import com.anysoftkeyboard.devicespecific.DeviceSpecific;
 import com.anysoftkeyboard.devicespecific.DeviceSpecificV15;
 import com.anysoftkeyboard.devicespecific.DeviceSpecificV16;
@@ -47,12 +51,16 @@ import com.anysoftkeyboard.dictionaries.ExternalDictionaryFactory;
 import com.anysoftkeyboard.keyboardextensions.KeyboardExtension;
 import com.anysoftkeyboard.keyboardextensions.KeyboardExtensionFactory;
 import com.anysoftkeyboard.keyboards.KeyboardFactory;
+import com.anysoftkeyboard.prefs.DirectBootAwareSharedPreferences;
+import com.anysoftkeyboard.prefs.GlobalPrefsBackup;
 import com.anysoftkeyboard.prefs.RxSharedPrefs;
 import com.anysoftkeyboard.quicktextkeys.QuickTextKeyFactory;
 import com.anysoftkeyboard.saywhat.EasterEggs;
 import com.anysoftkeyboard.saywhat.Notices;
 import com.anysoftkeyboard.saywhat.PublicNotice;
 import com.anysoftkeyboard.theme.KeyboardThemeFactory;
+import com.anysoftkeyboard.ui.SendBugReportUiActivity;
+import com.anysoftkeyboard.ui.dev.DeveloperUtils;
 import com.anysoftkeyboard.ui.tutorials.TutorialsProvider;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
@@ -61,6 +69,8 @@ import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -121,26 +131,13 @@ public class AnyApplication extends MultiDexApplication {
         return ((AnyApplication) context.getApplicationContext()).mQuickTextKeyFactory;
     }
 
-    @NonNull
-    public static File getBackupFile(@NonNull Context context, @NonNull String filename) {
-        // https://github.com/AnySoftKeyboard/AnySoftKeyboard/pull/2864/files#r636605962
-
-        // For Android 11 (maybe earlier?) we need to make sure the external application directory
-        // exists, to do so, just have the system get an empty file from it and Android will create
-        // it for us.  Likewise we have to do it here instead of in the getBackupFile function as
-        // we don't have the right context by that time.  We need this to write backups too and
-        // with Android 11 we can no longer do this ourselves.
-        final File externalFolder = context.getExternalFilesDir(null);
-        return new File(externalFolder, filename);
-    }
-
     public static long getCurrentVersionInstallTime(Context appContext) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(appContext);
+        SharedPreferences sp = DirectBootAwareSharedPreferences.create(appContext);
         return sp.getLong(PREF_KEYS_LAST_INSTALLED_APP_TIME, 0);
     }
 
     public static int getFirstAppVersionInstalled(Context appContext) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(appContext);
+        SharedPreferences sp = DirectBootAwareSharedPreferences.create(appContext);
         return sp.getInt(PREF_KEYS_FIRST_INSTALLED_APP_VERSION, 0);
     }
 
@@ -169,8 +166,8 @@ public class AnyApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        setupCrashHandler(sp);
+        DirectBootAwareSharedPreferences.create(this, this::onSharedPreferencesReady);
+
         Logger.d(TAG, "** Starting application in DEBUG mode.");
         Logger.i(TAG, "** Version: " + BuildConfig.VERSION_NAME);
         Logger.i(TAG, "** Release code: " + BuildConfig.VERSION_CODE);
@@ -185,10 +182,7 @@ public class AnyApplication extends MultiDexApplication {
                         + " concrete class "
                         + msDeviceSpecific.getClass().getName());
 
-        // setting some statistics
-        updateStatistics(this);
-
-        mRxSharedPrefs = new RxSharedPrefs(this, sp);
+        mRxSharedPrefs = new RxSharedPrefs(this, this::prefsAutoRestoreFunction);
 
         mKeyboardFactory = createKeyboardFactory();
         mExternalDictionaryFactory = createExternalDictionaryFactory();
@@ -197,8 +191,6 @@ public class AnyApplication extends MultiDexApplication {
         mExtensionKeyboardFactory = createToolsKeyboardExtensionFactory();
         mKeyboardThemeFactory = createKeyboardThemeFactory();
         mQuickTextKeyFactory = createQuickTextKeyFactory();
-
-        TutorialsProvider.showDragonsIfNeeded(getApplicationContext());
 
         mCompositeDisposable.add(
                 mRxSharedPrefs
@@ -238,6 +230,48 @@ public class AnyApplication extends MultiDexApplication {
         mPublicNotices.addAll(Notices.create(this));
     }
 
+    private void onSharedPreferencesReady(@NonNull SharedPreferences sp) {
+        setupCrashHandler(sp);
+        updateStatistics(sp);
+        TutorialsProvider.showDragonsIfNeeded(getApplicationContext());
+    }
+
+    private void prefsAutoRestoreFunction(@NonNull File file) {
+        Logger.d(TAG, "Starting prefsAutoRestoreFunction for '%s'", file);
+        // NOTE: shared_prefs_provider_name is the only supported prefs. All others require
+        // dictionaries to load prior.
+        final Pair<List<GlobalPrefsBackup.ProviderDetails>, Boolean[]> providers =
+                Observable.fromIterable(GlobalPrefsBackup.getAllAutoApplyPrefsProviders(this))
+                        .map(p -> Pair.create(p, true))
+                        .collectInto(
+                                Pair.create(
+                                        new ArrayList<GlobalPrefsBackup.ProviderDetails>(),
+                                        new ArrayList<Boolean>()),
+                                (collectInto, aPair) -> {
+                                    collectInto.first.add(aPair.first);
+                                    collectInto.second.add(aPair.second);
+                                })
+                        .map(
+                                p ->
+                                        Pair.create(
+                                                (List<GlobalPrefsBackup.ProviderDetails>) p.first,
+                                                p.second.toArray(new Boolean[0])))
+                        .blockingGet();
+
+        try {
+            GlobalPrefsBackup.restore(providers, new FileInputStream(file))
+                    .blockingForEach(
+                            providerDetails ->
+                                    Logger.i(
+                                            TAG,
+                                            "Restored prefs for '%s'",
+                                            getString(providerDetails.providerTitle)));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Logger.w(TAG, e, "Failed to load auto-apply file!");
+        }
+    }
+
     public List<PublicNotice> getPublicNotices() {
         return Collections.unmodifiableList(mPublicNotices);
     }
@@ -260,9 +294,7 @@ public class AnyApplication extends MultiDexApplication {
         return mNightModeSubject;
     }
 
-    private void updateStatistics(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-
+    private void updateStatistics(@NonNull SharedPreferences sp) {
         boolean firstAppInstall = false;
         boolean firstVersionInstall = false;
 
@@ -348,9 +380,16 @@ public class AnyApplication extends MultiDexApplication {
                 resources.getString(R.string.settings_key_show_chewbacca),
                 resources.getBoolean(R.bool.settings_default_show_chewbacca))) {
             final ChewbaccaUncaughtExceptionHandler chewbaccaUncaughtExceptionHandler =
-                    new ChewbaccaUncaughtExceptionHandler(this, globalErrorHandler);
+                    new AnyChewbaccaUncaughtExceptionHandler(this, globalErrorHandler);
             Thread.setDefaultUncaughtExceptionHandler(chewbaccaUncaughtExceptionHandler);
-            RxJavaPlugins.setErrorHandler(chewbaccaUncaughtExceptionHandler);
+            RxJavaPlugins.setErrorHandler(
+                    e ->
+                            chewbaccaUncaughtExceptionHandler.uncaughtException(
+                                    Thread.currentThread(), e));
+
+            if (chewbaccaUncaughtExceptionHandler.performCrashDetectingFlow()) {
+                Logger.w(TAG, "Previous crash detected and reported!");
+            }
         }
 
         Logger.setLogProvider(new NullLogProvider());
@@ -390,6 +429,36 @@ public class AnyApplication extends MultiDexApplication {
                     "Fatal Java error '%s' on thread '%s'",
                     throwable.getMessage(),
                     t.toString());
+        }
+    }
+
+    private static class AnyChewbaccaUncaughtExceptionHandler
+            extends ChewbaccaUncaughtExceptionHandler {
+
+        public AnyChewbaccaUncaughtExceptionHandler(
+                @NonNull Context app, @Nullable Thread.UncaughtExceptionHandler previous) {
+            super(app, previous);
+        }
+
+        @NonNull
+        @Override
+        protected Intent createBugReportingActivityIntent() {
+            return new Intent(mApp, SendBugReportUiActivity.class);
+        }
+
+        @Override
+        protected void setupNotification(@NonNull NotificationCompat.Builder builder) {
+            builder.setSmallIcon(R.drawable.ic_notification_error)
+                    .setColor(ContextCompat.getColor(mApp, R.color.notification_background_error))
+                    .setTicker(mApp.getText(R.string.ime_crashed_ticker))
+                    .setContentTitle(mApp.getText(R.string.ime_name))
+                    .setContentText(mApp.getText(R.string.ime_crashed_sub_text));
+        }
+
+        @NonNull
+        @Override
+        protected String getAppDetails() {
+            return DeveloperUtils.getAppDetails(mApp);
         }
     }
 }

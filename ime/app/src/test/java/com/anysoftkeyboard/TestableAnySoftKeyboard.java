@@ -24,7 +24,10 @@ import com.anysoftkeyboard.dictionaries.DictionaryAddOnAndBuilder;
 import com.anysoftkeyboard.dictionaries.DictionaryBackgroundLoader;
 import com.anysoftkeyboard.dictionaries.GetWordsCallback;
 import com.anysoftkeyboard.dictionaries.Suggest;
+import com.anysoftkeyboard.dictionaries.SuggestImpl;
+import com.anysoftkeyboard.dictionaries.SuggestionsProvider;
 import com.anysoftkeyboard.dictionaries.WordComposer;
+import com.anysoftkeyboard.dictionaries.content.ContactsDictionary;
 import com.anysoftkeyboard.ime.AnySoftKeyboardClipboard;
 import com.anysoftkeyboard.ime.InputViewBinder;
 import com.anysoftkeyboard.keyboards.AnyKeyboard;
@@ -196,7 +199,16 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     @NonNull
     @Override
     protected Suggest createSuggest() {
-        return Mockito.spy(new TestableSuggest(super.createSuggest()));
+        return Mockito.spy(
+                new TestableSuggest(
+                        new SuggestImpl(
+                                new SuggestionsProvider(this) {
+                                    @NonNull
+                                    @Override
+                                    protected ContactsDictionary createRealContactsDictionary() {
+                                        return Mockito.mock(ContactsDictionary.class);
+                                    }
+                                })));
     }
 
     // MAGIC: now it is visible for tests
@@ -255,6 +267,13 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
                 .when(mMockCandidateView)
                 .getVisibility();
 
+        Mockito.doReturn(
+                        ApplicationProvider.getApplicationContext()
+                                .getResources()
+                                .getDrawable(R.drawable.close_suggestions_strip_icon))
+                .when(mMockCandidateView)
+                .getCloseIcon();
+
         Mockito.doAnswer(invocation -> mCandidateVisibility = invocation.getArgument(0))
                 .when(mMockCandidateView)
                 .setVisibility(anyInt());
@@ -284,11 +303,14 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     @Override
     protected KeyboardViewContainerView createInputViewContainer() {
         final KeyboardViewContainerView originalInputContainer = super.createInputViewContainer();
-        AnyKeyboardView inputView = (AnyKeyboardView) originalInputContainer.getChildAt(1);
+        AnyKeyboardView inputView =
+                (AnyKeyboardView) originalInputContainer.getStandardKeyboardView();
+
         originalInputContainer.removeAllViews();
         mMockCandidateView = Mockito.mock(CandidateView.class);
         setupMockCandidateView();
         mSpiedKeyboardView = Mockito.spy(inputView);
+
         originalInputContainer.addView(mMockCandidateView);
         originalInputContainer.addView(mSpiedKeyboardView);
 
@@ -346,6 +368,7 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
         simulateTextTyping(text, true, true);
     }
 
+    @SuppressWarnings("LoopOverCharArray")
     public void simulateTextTyping(
             final String text, final boolean advanceTime, final boolean asDiscreteKeys) {
         if (asDiscreteKeys) {
@@ -372,27 +395,31 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
         simulateKeyPress(key, advanceTime);
     }
 
-    public void simulateKeyPress(final Keyboard.Key key, final boolean advanceTime) {
-        final int primaryCode = key.getPrimaryCode();
-        onPress(primaryCode);
+    public void simulateKeyPress(Keyboard.Key key, final boolean advanceTime) {
+        final int primaryCode;
+        final int[] nearByKeyCodes;
         final AnyKeyboard keyboard = getCurrentKeyboard();
         Assert.assertNotNull(keyboard);
         if (key instanceof AnyKeyboard.AnyKey /*this will ensure this instance is not a mock*/) {
-            final int keyCodeWithShiftState =
+            primaryCode =
                     key.getCodeAtIndex(
                             0,
                             mSpiedKeyboardView != null
                                     && mSpiedKeyboardView.getKeyDetector().isKeyShifted(key));
-            int[] nearByKeyCodes = new int[64];
+            nearByKeyCodes = new int[64];
             if (mSpiedKeyboardView != null) {
                 mSpiedKeyboardView
                         .getKeyDetector()
                         .getKeyIndexAndNearbyCodes(key.centerX, key.centerY, nearByKeyCodes);
             }
-            onKey(keyCodeWithShiftState, key, 0, nearByKeyCodes, true);
+
         } else {
-            onKey(primaryCode, null, 0, new int[0], true);
+            primaryCode = key.getPrimaryCode();
+            key = null;
+            nearByKeyCodes = new int[0];
         }
+        onPress(primaryCode);
+        onKey(primaryCode, key, 0, nearByKeyCodes, true);
         onRelease(primaryCode);
         if (advanceTime) {
             TestRxSchedulers.foregroundAdvanceBy(mDelayBetweenTyping);
@@ -510,11 +537,12 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
                                                                 "bye".toCharArray(),
                                                                 "one".toCharArray(),
                                                                 "two".toCharArray(),
+                                                                "poo".toCharArray(),
                                                                 "three".toCharArray()
                                                             },
                                                             new int[] {
                                                                 180, 100, 253, 200, 120, 140, 100,
-                                                                80, 60
+                                                                80, 40, 60
                                                             });
                                             return null;
                                         })
@@ -565,55 +593,6 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
             return mOriginalOverlayDataCreator.createOverlayData(remoteApp);
         }
     }
-
-    //    public static class TestableSuggest extends Suggest {
-    //
-    //        private boolean mHasMinimalCorrection;
-    //        private boolean mEnabledSuggestions;
-    //
-    //        public TestableSuggest(Context context) {
-    //            super(context);
-    //        }
-    //
-    //        @Override
-    //        public void setCorrectionMode(
-    //                boolean enabledSuggestions,
-    //                int maxLengthDiff,
-    //                int maxDistance,
-    //                int minimumWorLength) {
-    //            super.setCorrectionMode(
-    //                    enabledSuggestions, maxLengthDiff, maxDistance, minimumWorLength);
-    //            mEnabledSuggestions = enabledSuggestions;
-    //        }
-    //
-    //        @Override
-    //        public List<CharSequence> getSuggestions(
-    //                WordComposer wordComposer, boolean includeTypedWordIfValid) {
-    //            if (!mEnabledSuggestions) return Collections.emptyList();
-    //
-    //            if (wordComposer.isAtTagsSearchState()) {
-    //                return super.getSuggestions(wordComposer, includeTypedWordIfValid);
-    //            }
-    //
-    //            String word = wordComposer.getTypedWord().toString().toLowerCase();
-    //
-    //            ArrayList<CharSequence> suggestions = new ArrayList<>();
-    //            suggestions.add(wordComposer.getTypedWord());
-    //            if (mDefinedWords.containsKey(word)) {
-    //                suggestions.addAll(mDefinedWords.get(word));
-    //                mHasMinimalCorrection = true;
-    //            } else {
-    //                mHasMinimalCorrection = false;
-    //            }
-    //
-    //            return suggestions;
-    //        }
-    //
-    //        @Override
-    //        public boolean hasMinimalCorrection() {
-    //            return mHasMinimalCorrection;
-    //        }
-    //    }
 
     public static class TestableKeyboardSwitcher extends KeyboardSwitcher {
 
@@ -712,9 +691,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
                 boolean enabledSuggestions,
                 int maxLengthDiff,
                 int maxDistance,
-                int minimumWorLength) {
-            mDelegate.setCorrectionMode(
-                    enabledSuggestions, maxLengthDiff, maxDistance, minimumWorLength);
+                boolean splitWords) {
+            mDelegate.setCorrectionMode(enabledSuggestions, maxLengthDiff, maxDistance, splitWords);
         }
 
         @Override
@@ -751,14 +729,13 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
         }
 
         @Override
-        public List<CharSequence> getSuggestions(
-                WordComposer wordComposer, boolean includeTypedWordIfValid) {
-            return mDelegate.getSuggestions(wordComposer, includeTypedWordIfValid);
+        public List<CharSequence> getSuggestions(WordComposer wordComposer) {
+            return mDelegate.getSuggestions(wordComposer);
         }
 
         @Override
-        public boolean hasMinimalCorrection() {
-            return mDelegate.hasMinimalCorrection();
+        public int getLastValidSuggestionIndex() {
+            return mDelegate.getLastValidSuggestionIndex();
         }
 
         @Override

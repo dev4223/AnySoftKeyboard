@@ -7,6 +7,7 @@ import com.anysoftkeyboard.keyboards.Keyboard;
 import com.anysoftkeyboard.keyboards.views.AnyKeyboardView;
 import com.anysoftkeyboard.keyboards.views.KeyboardViewContainerView;
 import com.anysoftkeyboard.quicktextkeys.QuickTextKey;
+import com.anysoftkeyboard.quicktextkeys.ui.DefaultGenderPrefTracker;
 import com.anysoftkeyboard.quicktextkeys.ui.DefaultSkinTonePrefTracker;
 import com.anysoftkeyboard.quicktextkeys.ui.QuickTextPagerView;
 import com.anysoftkeyboard.quicktextkeys.ui.QuickTextViewFactory;
@@ -19,6 +20,7 @@ public abstract class AnySoftKeyboardWithQuickText extends AnySoftKeyboardMediaI
     private boolean mDoNotFlipQuickTextKeyAndPopupFunctionality;
     private String mOverrideQuickTextText = "";
     private DefaultSkinTonePrefTracker mDefaultSkinTonePrefTracker;
+    private DefaultGenderPrefTracker mDefaultGenderPrefTracker;
 
     @Override
     public void onCreate() {
@@ -44,6 +46,8 @@ public abstract class AnySoftKeyboardWithQuickText extends AnySoftKeyboardMediaI
 
         mDefaultSkinTonePrefTracker = new DefaultSkinTonePrefTracker(prefs());
         addDisposable(mDefaultSkinTonePrefTracker);
+        mDefaultGenderPrefTracker = new DefaultGenderPrefTracker(prefs());
+        addDisposable(mDefaultGenderPrefTracker);
     }
 
     protected void onQuickTextRequested(Keyboard.Key key) {
@@ -75,9 +79,7 @@ public abstract class AnySoftKeyboardWithQuickText extends AnySoftKeyboardMediaI
     @Override
     public void onFinishInputView(boolean finishingInput) {
         super.onFinishInputView(finishingInput);
-        if (finishingInput) {
-            cleanUpQuickTextKeyboard(true);
-        }
+        cleanUpQuickTextKeyboard(true);
     }
 
     private void switchToQuickTextKeyboard() {
@@ -92,7 +94,8 @@ public abstract class AnySoftKeyboardWithQuickText extends AnySoftKeyboardMediaI
                         getApplicationContext(),
                         inputViewContainer,
                         getQuickKeyHistoryRecords(),
-                        mDefaultSkinTonePrefTracker);
+                        mDefaultSkinTonePrefTracker,
+                        mDefaultGenderPrefTracker);
         actualInputView.resetInputView();
         quickTextsLayout.setThemeValues(
                 mCurrentTheme,
@@ -103,6 +106,7 @@ public abstract class AnySoftKeyboardWithQuickText extends AnySoftKeyboardMediaI
                 actualInputView.getDrawableForKeyCode(KeyCodes.SETTINGS),
                 actualInputView.getBackground(),
                 actualInputView.getDrawableForKeyCode(KeyCodes.IMAGE_MEDIA_POPUP),
+                actualInputView.getDrawableForKeyCode(KeyCodes.CLEAR_QUICK_TEXT_HISTORY),
                 actualInputView.getPaddingBottom(),
                 getSupportedMediaTypesForInput());
 

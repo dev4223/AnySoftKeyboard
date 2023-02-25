@@ -16,6 +16,7 @@
 
 package com.anysoftkeyboard.ime;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.view.Gravity;
@@ -61,6 +62,8 @@ public abstract class AnySoftKeyboardBase extends InputMethodService
     // an inaccurate position (in cases where onSelectionUpdate is delayed).
     protected int mGlobalCursorPositionDangerous = 0;
     protected int mGlobalSelectionStartPositionDangerous = 0;
+    protected int mGlobalCandidateStartPositionDangerous = 0;
+    protected int mGlobalCandidateEndPositionDangerous = 0;
 
     protected final ModifierKeyState mShiftKeyState =
             new ModifierKeyState(true /*supports locked state*/);
@@ -107,6 +110,7 @@ public abstract class AnySoftKeyboardBase extends InputMethodService
         return mInputView;
     }
 
+    @Nullable
     public KeyboardViewContainerView getInputViewContainer() {
         return mInputViewContainer;
     }
@@ -238,6 +242,7 @@ public abstract class AnySoftKeyboardBase extends InputMethodService
         }
     }
 
+    @SuppressLint("InflateParams")
     protected KeyboardViewContainerView createInputViewContainer() {
         return (KeyboardViewContainerView)
                 getLayoutInflater().inflate(R.layout.main_keyboard_layout, null);
@@ -274,6 +279,8 @@ public abstract class AnySoftKeyboardBase extends InputMethodService
         mInputSessionDisposables.clear();
         mGlobalCursorPositionDangerous = 0;
         mGlobalSelectionStartPositionDangerous = 0;
+        mGlobalCandidateStartPositionDangerous = 0;
+        mGlobalCandidateEndPositionDangerous = 0;
     }
 
     protected abstract boolean isSelectionUpdateDelayed();
@@ -322,6 +329,8 @@ public abstract class AnySoftKeyboardBase extends InputMethodService
         }
         mGlobalCursorPositionDangerous = newSelEnd;
         mGlobalSelectionStartPositionDangerous = newSelStart;
+        mGlobalCandidateStartPositionDangerous = candidatesStart;
+        mGlobalCandidateEndPositionDangerous = candidatesEnd;
     }
 
     @Override

@@ -9,20 +9,22 @@ import com.anysoftkeyboard.TestInputConnection;
 import com.anysoftkeyboard.TestableAnySoftKeyboard;
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.keyboards.Keyboard;
+import com.anysoftkeyboard.quicktextkeys.ui.QuickTextPagerView;
 import com.anysoftkeyboard.rx.TestRxSchedulers;
 import com.anysoftkeyboard.test.SharedPrefsHelper;
+import com.anysoftkeyboard.test.TestUtils;
 import com.menny.android.anysoftkeyboard.R;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
 @RunWith(AnySoftKeyboardRobolectricTestRunner.class)
-@Config(sdk = Config.NEWEST_SDK /*since we are sensitive to actual latest unicode emojis*/)
+/*since we are sensitive to actual latest unicode emojis*/
+@Config(sdk = TestUtils.NEWEST_STABLE_API_LEVEL)
 public class AnySoftKeyboardQuickTextTest extends AnySoftKeyboardBaseTest {
-    // this is related to https://github.com/robolectric/robolectric/issues/6433
-    // should be "\uD83D\uDE03"
-    private static final String WRONG_KEY_OUTPUT = "\uFFFD\uFFFD";
+    private static final String KEY_OUTPUT = "\uD83D\uDE03";
 
     @Test
     public void testOutputTextKeyOutputText() {
@@ -31,8 +33,17 @@ public class AnySoftKeyboardQuickTextTest extends AnySoftKeyboardBaseTest {
 
         mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.QUICK_TEXT);
 
-        Assert.assertEquals(WRONG_KEY_OUTPUT, inputConnection.getCurrentTextInInputConnection());
-        Assert.assertEquals(3, mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount());
+        Assert.assertEquals(KEY_OUTPUT, inputConnection.getCurrentTextInInputConnection());
+        AtomicBoolean foundQuickTextView = new AtomicBoolean(false);
+        for (int childIndex = 0;
+                childIndex < mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount();
+                childIndex++) {
+            if (mAnySoftKeyboardUnderTest.getInputViewContainer().getChildAt(childIndex)
+                    instanceof QuickTextPagerView) {
+                foundQuickTextView.set(true);
+            }
+        }
+        Assert.assertFalse(foundQuickTextView.get());
         Assert.assertFalse(mAnySoftKeyboardUnderTest.isCurrentlyPredicting());
 
         Assert.assertSame(
@@ -379,7 +390,16 @@ public class AnySoftKeyboardQuickTextTest extends AnySoftKeyboardBaseTest {
 
         Assert.assertEquals("", inputConnection.getCurrentTextInInputConnection());
 
-        Assert.assertEquals(3, mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount());
+        AtomicBoolean foundQuickTextView = new AtomicBoolean(false);
+        for (int childIndex = 0;
+                childIndex < mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount();
+                childIndex++) {
+            if (mAnySoftKeyboardUnderTest.getInputViewContainer().getChildAt(childIndex)
+                    instanceof QuickTextPagerView) {
+                foundQuickTextView.set(true);
+            }
+        }
+        Assert.assertTrue(foundQuickTextView.get());
 
         Assert.assertSame(
                 mAnySoftKeyboardUnderTest.getInputView(),
@@ -399,13 +419,22 @@ public class AnySoftKeyboardQuickTextTest extends AnySoftKeyboardBaseTest {
 
         mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.QUICK_TEXT_POPUP);
 
-        Assert.assertEquals(WRONG_KEY_OUTPUT, inputConnection.getCurrentTextInInputConnection());
+        Assert.assertEquals(KEY_OUTPUT, inputConnection.getCurrentTextInInputConnection());
 
-        Assert.assertEquals(3, mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount());
+        AtomicBoolean foundQuickTextView = new AtomicBoolean(false);
+        for (int childIndex = 0;
+                childIndex < mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount();
+                childIndex++) {
+            if (mAnySoftKeyboardUnderTest.getInputViewContainer().getChildAt(childIndex)
+                    instanceof QuickTextPagerView) {
+                foundQuickTextView.set(true);
+            }
+        }
+        Assert.assertFalse(foundQuickTextView.get());
 
         Assert.assertSame(
                 mAnySoftKeyboardUnderTest.getInputView(),
-                mAnySoftKeyboardUnderTest.getInputViewContainer().getChildAt(1));
+                mAnySoftKeyboardUnderTest.getInputViewContainer().getStandardKeyboardView());
 
         Assert.assertEquals(
                 View.VISIBLE, ((View) mAnySoftKeyboardUnderTest.getInputView()).getVisibility());
@@ -429,11 +458,20 @@ public class AnySoftKeyboardQuickTextTest extends AnySoftKeyboardBaseTest {
 
         Assert.assertEquals("", inputConnection.getCurrentTextInInputConnection());
 
-        Assert.assertEquals(3, mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount());
+        AtomicBoolean foundQuickTextView = new AtomicBoolean(false);
+        for (int childIndex = 0;
+                childIndex < mAnySoftKeyboardUnderTest.getInputViewContainer().getChildCount();
+                childIndex++) {
+            if (mAnySoftKeyboardUnderTest.getInputViewContainer().getChildAt(childIndex)
+                    instanceof QuickTextPagerView) {
+                foundQuickTextView.set(true);
+            }
+        }
+        Assert.assertTrue(foundQuickTextView.get());
 
         Assert.assertSame(
                 mAnySoftKeyboardUnderTest.getInputView(),
-                mAnySoftKeyboardUnderTest.getInputViewContainer().getChildAt(1));
+                mAnySoftKeyboardUnderTest.getInputViewContainer().getStandardKeyboardView());
 
         Assert.assertEquals(
                 View.GONE, ((View) mAnySoftKeyboardUnderTest.getInputView()).getVisibility());
@@ -522,7 +560,7 @@ public class AnySoftKeyboardQuickTextTest extends AnySoftKeyboardBaseTest {
     }
 
     @Test
-    public void testDoNotCloseQuickTextKeyboardOnInputNotReallyFinished() {
+    public void testCloseQuickTextKeyboardOnFinishInputView() {
         Assert.assertEquals(
                 View.VISIBLE, ((View) mAnySoftKeyboardUnderTest.getInputView()).getVisibility());
         Assert.assertEquals(
@@ -543,37 +581,16 @@ public class AnySoftKeyboardQuickTextTest extends AnySoftKeyboardBaseTest {
         final EditorInfo editorInfo = mAnySoftKeyboardUnderTest.getCurrentInputEditorInfo();
         mAnySoftKeyboardUnderTest.onFinishInputView(false);
 
-        Assert.assertEquals(
-                View.GONE, ((View) mAnySoftKeyboardUnderTest.getInputView()).getVisibility());
-        Assert.assertEquals(
-                View.VISIBLE,
+        Assert.assertNull(
                 mAnySoftKeyboardUnderTest
                         .getInputViewContainer()
-                        .findViewById(R.id.quick_text_pager_root)
-                        .getVisibility());
-        Assert.assertEquals(
-                View.GONE,
-                mAnySoftKeyboardUnderTest
-                        .getInputViewContainer()
-                        .getCandidateView()
-                        .getVisibility());
-
+                        .findViewById(R.id.quick_text_pager_root));
         mAnySoftKeyboardUnderTest.onStartInputView(editorInfo, true);
 
-        Assert.assertEquals(
-                View.VISIBLE,
+        Assert.assertNull(
                 mAnySoftKeyboardUnderTest
                         .getInputViewContainer()
-                        .findViewById(R.id.quick_text_pager_root)
-                        .getVisibility());
-        Assert.assertEquals(
-                View.GONE, ((View) mAnySoftKeyboardUnderTest.getInputView()).getVisibility());
-        Assert.assertEquals(
-                View.GONE,
-                mAnySoftKeyboardUnderTest
-                        .getInputViewContainer()
-                        .getCandidateView()
-                        .getVisibility());
+                        .findViewById(R.id.quick_text_pager_root));
     }
 
     @Test

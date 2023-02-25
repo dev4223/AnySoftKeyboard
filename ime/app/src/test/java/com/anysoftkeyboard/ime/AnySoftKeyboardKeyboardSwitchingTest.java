@@ -6,6 +6,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.view.inputmethod.EditorInfo;
 import androidx.appcompat.app.AlertDialog;
 import androidx.test.core.app.ApplicationProvider;
@@ -38,19 +39,19 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
         Assert.assertEquals(
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardName(),
                 getApplicationContext().getString(R.string.english_keyboard));
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         Assert.assertEquals(
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardName(),
                 getApplicationContext().getString(R.string.symbols_keyboard));
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         Assert.assertEquals(
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardName(),
                 getApplicationContext().getString(R.string.symbols_alt_keyboard));
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         Assert.assertEquals(
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardName(),
                 getApplicationContext().getString(R.string.symbols_numbers_keyboard));
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         Assert.assertEquals(
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardName(),
                 getApplicationContext().getString(R.string.symbols_keyboard));
@@ -62,14 +63,14 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
 
     @Test
     public void testCreateOrUseCacheKeyboard() {
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard("symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         final AnyKeyboard symbolsKeyboard = mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests();
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard("alt_symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         final AnyKeyboard altSymbolsKeyboard =
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests();
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard(
                 "alt_numbers_symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         final AnyKeyboard altNumbersSymbolsKeyboard =
@@ -78,10 +79,10 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
         Assert.assertNotSame(altSymbolsKeyboard, altNumbersSymbolsKeyboard);
         Assert.assertNotSame(altNumbersSymbolsKeyboard, symbolsKeyboard);
         // already created
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         Assert.assertSame(symbolsKeyboard, mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests());
         mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_ALPHABET);
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         Assert.assertSame(symbolsKeyboard, mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests());
     }
 
@@ -105,7 +106,7 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
                 Keyboard.KEYBOARD_ROW_MODE_EMAIL,
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardMode());
 
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
 
         Assert.assertEquals(
                 "symbols_keyboard",
@@ -141,7 +142,7 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
                 Keyboard.KEYBOARD_ROW_MODE_URL,
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests().getKeyboardMode());
 
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
 
         Assert.assertEquals(
                 "symbols_keyboard",
@@ -154,14 +155,14 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
     @Test
     public void testCreateOrUseCacheKeyboardWhen16KeysEnabled() {
         SharedPrefsHelper.setPrefsValue("settings_key_use_16_keys_symbols_keyboards", true);
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard("symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         final AnyKeyboard symbolsKeyboard = mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests();
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard("alt_symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         final AnyKeyboard altSymbolsKeyboard =
                 mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests();
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard(
                 "alt_numbers_symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         final AnyKeyboard altNumbersSymbolsKeyboard =
@@ -172,14 +173,14 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
         Assert.assertNotSame(altNumbersSymbolsKeyboard, symbolsKeyboard);
 
         // now, cycling should use cached instances
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard("symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         Assert.assertSame(symbolsKeyboard, mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests());
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard("alt_symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         Assert.assertSame(
                 altSymbolsKeyboard, mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests());
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         verifyCreatedGenericKeyboard(
                 "alt_numbers_symbols_keyboard", KeyboardSwitcher.INPUT_MODE_TEXT);
         Assert.assertSame(
@@ -292,7 +293,7 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
         mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_ALPHABET);
         Assert.assertSame(
                 phoneKeyboardInstance, mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests());
-        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMOBLS);
+        mAnySoftKeyboardUnderTest.simulateKeyPress(KeyCodes.MODE_SYMBOLS);
         Assert.assertSame(
                 phoneKeyboardInstance, mAnySoftKeyboardUnderTest.getCurrentKeyboardForTests());
 
@@ -511,10 +512,8 @@ public class AnySoftKeyboardKeyboardSwitchingTest extends AnySoftKeyboardBaseTes
         Assert.assertEquals(
                 MainSettingsActivity.class.getName(), settingsIntent.getComponent().getClassName());
         Assert.assertEquals(
-                "keyboards",
-                settingsIntent
-                        .getExtras()
-                        .getString(MainSettingsActivity.EXTRA_KEY_APP_SHORTCUT_ID));
+                Uri.parse(getApplicationContext().getString(R.string.deeplink_url_keyboards)),
+                settingsIntent.getData());
         Assert.assertEquals(Intent.ACTION_VIEW, settingsIntent.getAction());
         Assert.assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK, settingsIntent.getFlags());
     }

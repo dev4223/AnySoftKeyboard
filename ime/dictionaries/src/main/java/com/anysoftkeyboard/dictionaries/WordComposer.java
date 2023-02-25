@@ -107,26 +107,6 @@ public class WordComposer implements KeyCodesProvider {
         mCursorPosition = position;
     }
 
-    /*
-    public boolean hasUserMovedCursor(int cursorPosition)
-    {
-        if (AnyApplication.DEBUG)
-        {
-            Log.d(TAG, "Current cursor position inside word is "+mCursorPosition+", and word starts at "+mCandidatesStartPosition+". Input's cursor is at "+cursorPosition);
-        }
-        return (cursorPosition != (mCursorPosition + mCandidatesStartPosition));
-    }
-
-    public boolean hasUserMovedCursorInsideOfWord(int cursorPosition)
-    {
-        if (AnyApplication.DEBUG)
-        {
-            Log.d(TAG, "Current word length is "+mTypedWord.length()+", and word starts at "+mCandidatesStartPosition+". Input's cursor is at "+cursorPosition);
-        }
-        return (cursorPosition >= mCandidatesStartPosition &&  cursorPosition <= (mCandidatesStartPosition+mTypedWord.length()));
-    }
-    */
-
     /**
      * Returns the codes at a particular position in the word.
      *
@@ -200,11 +180,6 @@ public class WordComposer implements KeyCodesProvider {
      * @param nearByKeyCodes array of codes based on distance from touch point
      */
     private static void correctPrimaryJuxtapos(int primaryCode, int[] nearByKeyCodes) {
-        /*if (codes.length < 2) return;
-        if (codes[0] > 0 && codes[1] > 0 && codes[0] != primaryCode && codes[1] == primaryCode) {
-            codes[1] = codes[0];
-            codes[0] = primaryCode;
-        }*/
         if (nearByKeyCodes != null
                 && nearByKeyCodes.length > 1
                 && primaryCode != nearByKeyCodes[0]
@@ -219,8 +194,10 @@ public class WordComposer implements KeyCodesProvider {
                     break;
                 }
             }
-            if (!found) // reverting
-            nearByKeyCodes[0] = swappedItem;
+            if (!found) {
+                // reverting
+                nearByKeyCodes[0] = swappedItem;
+            }
         }
     }
 
@@ -238,7 +215,7 @@ public class WordComposer implements KeyCodesProvider {
         } else if (BuildConfig.DEBUG) {
             throw new IllegalStateException(
                     "mTypedWord is '"
-                            + mTypedWord.toString()
+                            + mTypedWord
                             + "' while asking to delete '"
                             + typedTextToDeleteAtEnd
                             + "'.");

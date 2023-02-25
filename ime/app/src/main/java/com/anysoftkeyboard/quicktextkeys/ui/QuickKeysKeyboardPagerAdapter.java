@@ -32,6 +32,7 @@ import java.util.List;
     private final DefaultAddOn mDefaultLocalAddOn;
     private final ViewPagerWithDisable mViewPager;
     private final DefaultSkinTonePrefTracker mDefaultSkinTonePrefTracker;
+    private final DefaultGenderPrefTracker mDefaultGenderPrefTracker;
     private final KeyboardTheme mKeyboardTheme;
     private int mBottomPadding;
 
@@ -41,6 +42,7 @@ import java.util.List;
             @NonNull List<QuickTextKey> keyAddOns,
             @NonNull OnKeyboardActionListener keyboardActionListener,
             @NonNull DefaultSkinTonePrefTracker defaultSkinTonePrefTracker,
+            @NonNull DefaultGenderPrefTracker defaultGenderPrefTracker,
             @NonNull KeyboardTheme keyboardTheme,
             int bottomPadding) {
         mViewPager = ownerPager;
@@ -52,6 +54,7 @@ import java.util.List;
         mIsAutoFitKeyboards = new boolean[mAddOns.length];
         mLayoutInflater = LayoutInflater.from(context);
         mDefaultSkinTonePrefTracker = defaultSkinTonePrefTracker;
+        mDefaultGenderPrefTracker = defaultGenderPrefTracker;
         mKeyboardTheme = keyboardTheme;
         mBottomPadding = bottomPadding;
     }
@@ -61,8 +64,9 @@ import java.util.List;
         return mPopupKeyboards.length;
     }
 
+    @NonNull
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
         View root =
                 mLayoutInflater.inflate(
                         R.layout.quick_text_popup_autorowkeyboard_view, container, false);
@@ -82,7 +86,8 @@ import java.util.List;
         keyboardView.setOnKeyboardActionListener(mKeyboardActionListener);
         QuickTextKey addOn = mAddOns[position];
         AnyPopupKeyboard keyboard = mPopupKeyboards[position];
-        if (keyboard == null) {
+        if (keyboard == null
+                || position == 0 /*ALWAYS re-create history, in case it has changed*/) {
             if (addOn.isPopupKeyboardUsed()) {
                 keyboard =
                         new AnyPopupKeyboard(
@@ -91,7 +96,8 @@ import java.util.List;
                                 addOn.getPopupKeyboardResId(),
                                 keyboardView.getThemedKeyboardDimens(),
                                 addOn.getName(),
-                                mDefaultSkinTonePrefTracker.getDefaultSkinTone());
+                                mDefaultSkinTonePrefTracker.getDefaultSkinTone(),
+                                mDefaultGenderPrefTracker.getDefaultGender());
             } else {
                 keyboard =
                         new PopupListKeyboard(
