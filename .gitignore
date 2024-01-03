@@ -10,6 +10,10 @@ keystore.properties
 /codecov.sh
 outputs/
 app/release/
+.tmp/
+kotlin-profile/
+jdks/
+**/release
 
 addons/languages/german/apk/release/
 android/
