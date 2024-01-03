@@ -21,31 +21,32 @@ import android.os.Bundle;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import com.menny.android.anysoftkeyboard.R;
+import net.evendanan.pixel.UiUtils;
 
 public class QuickTextSettingsFragment extends PreferenceFragmentCompat {
 
-    private static void hidePref(Preference preference) {
-        preference.setEnabled(false);
-        preference.setVisible(false);
-    }
+  private static void hidePref(Preference preference) {
+    preference.setEnabled(false);
+    preference.setVisible(false);
+  }
 
-    @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        addPreferencesFromResource(R.xml.prefs_quick_text_addons_prefs);
-        // for now, we are not supporting gender picking at all. Not enough time on our plate...
-        hidePref(findPreference(getString(R.string.settings_key_default_emoji_gender)));
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            //
-            // hidePref(findPreference(getString(R.string.settings_key_default_emoji_gender)));
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                hidePref(findPreference(getString(R.string.settings_key_default_emoji_skin_tone)));
-            }
-        }
+  @Override
+  public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    addPreferencesFromResource(R.xml.prefs_quick_text_addons_prefs);
+    // for now, we are not supporting gender picking at all. Not enough time on our plate...
+    hidePref(findPreference(getString(R.string.settings_key_default_emoji_gender)));
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+      //
+      // hidePref(findPreference(getString(R.string.settings_key_default_emoji_gender)));
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+        hidePref(findPreference(getString(R.string.settings_key_default_emoji_skin_tone)));
+      }
     }
+  }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        MainSettingsActivity.setActivityTitle(this, getString(R.string.quick_text_keys_group));
-    }
+  @Override
+  public void onStart() {
+    super.onStart();
+    UiUtils.setActivityTitle(this, getString(R.string.quick_text_keys_group));
+  }
 }

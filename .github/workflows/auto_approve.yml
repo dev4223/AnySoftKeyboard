@@ -9,9 +9,9 @@ jobs:
   check-for-auto-approval:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.5.0
       - uses: ./.github/actions/auto_approval
         with:
           token: ${{ secrets.BOT_MASTER_RW_GITHUB_TOKEN }}
           allowed_users: menny
-          review_for: anysoftkeyboard-bot
+          review_as: anysoftkeyboard-bot

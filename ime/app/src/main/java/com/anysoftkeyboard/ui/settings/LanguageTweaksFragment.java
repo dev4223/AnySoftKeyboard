@@ -25,39 +25,39 @@ import com.anysoftkeyboard.keyboards.KeyboardAddOnAndBuilder;
 import com.menny.android.anysoftkeyboard.AnyApplication;
 import com.menny.android.anysoftkeyboard.R;
 import java.util.List;
+import net.evendanan.pixel.UiUtils;
 
 public class LanguageTweaksFragment extends PreferenceFragmentCompat {
 
-    @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        addPreferencesFromResource(R.xml.prefs_language_tweaks);
-    }
+  @Override
+  public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    addPreferencesFromResource(R.xml.prefs_language_tweaks);
+  }
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+  @Override
+  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
 
-        ListPreference listPreference =
-                (ListPreference)
-                        findPreference(getText(R.string.settings_key_layout_for_internet_fields));
-        List<KeyboardAddOnAndBuilder> enabledKeyboards =
-                AnyApplication.getKeyboardFactory(getContext()).getEnabledAddOns();
-        CharSequence[] entries = new CharSequence[enabledKeyboards.size() + 1];
-        entries[0] = getString(R.string.no_internet_fields_specific_layout);
-        CharSequence[] values = new CharSequence[enabledKeyboards.size() + 1];
-        values[0] = "none";
-        for (int keyboardIndex = 0; keyboardIndex < enabledKeyboards.size(); keyboardIndex++) {
-            final KeyboardAddOnAndBuilder builder = enabledKeyboards.get(keyboardIndex);
-            entries[keyboardIndex + 1] = builder.getName() + "\n" + builder.getDescription();
-            values[keyboardIndex + 1] = builder.getId();
-        }
-        listPreference.setEntries(entries);
-        listPreference.setEntryValues(values);
+    ListPreference listPreference =
+        (ListPreference) findPreference(getText(R.string.settings_key_layout_for_internet_fields));
+    List<KeyboardAddOnAndBuilder> enabledKeyboards =
+        AnyApplication.getKeyboardFactory(getContext()).getEnabledAddOns();
+    CharSequence[] entries = new CharSequence[enabledKeyboards.size() + 1];
+    entries[0] = getString(R.string.no_internet_fields_specific_layout);
+    CharSequence[] values = new CharSequence[enabledKeyboards.size() + 1];
+    values[0] = "none";
+    for (int keyboardIndex = 0; keyboardIndex < enabledKeyboards.size(); keyboardIndex++) {
+      final KeyboardAddOnAndBuilder builder = enabledKeyboards.get(keyboardIndex);
+      entries[keyboardIndex + 1] = builder.getName() + "\n" + builder.getDescription();
+      values[keyboardIndex + 1] = builder.getId();
     }
+    listPreference.setEntries(entries);
+    listPreference.setEntryValues(values);
+  }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        MainSettingsActivity.setActivityTitle(this, getString(R.string.tweaks_group));
-    }
+  @Override
+  public void onStart() {
+    super.onStart();
+    UiUtils.setActivityTitle(this, getString(R.string.tweaks_group));
+  }
 }

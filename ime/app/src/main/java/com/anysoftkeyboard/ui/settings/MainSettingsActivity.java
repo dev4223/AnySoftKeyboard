@@ -22,12 +22,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
-import com.anysoftkeyboard.android.PermissionRequestHelper;
+import com.anysoftkeyboard.permissions.PermissionRequestHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.menny.android.anysoftkeyboard.R;
 import net.evendanan.pixel.EdgeEffectHacker;
@@ -35,81 +33,66 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 
 public class MainSettingsActivity extends AppCompatActivity {
 
-    public static final String ACTION_REQUEST_PERMISSION_ACTIVITY =
-            "ACTION_REQUEST_PERMISSION_ACTIVITY";
-    public static final String EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY =
-            "EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY";
+  public static final String ACTION_REQUEST_PERMISSION_ACTIVITY =
+      "ACTION_REQUEST_PERMISSION_ACTIVITY";
+  public static final String EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY =
+      "EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY";
 
-    private CharSequence mTitle;
+  private CharSequence mTitle;
 
-    /**
-     * Will set the title in the hosting Activity's title. Will only set the title if the fragment
-     * is hosted by the Activity's manager, and not inner one.
-     */
-    public static void setActivityTitle(Fragment fragment, CharSequence title) {
-        FragmentActivity activity = fragment.requireActivity();
-        if (activity.getSupportFragmentManager() == fragment.getParentFragmentManager()) {
-            activity.setTitle(title);
-        }
+  @Override
+  protected void onCreate(Bundle icicle) {
+    super.onCreate(icicle);
+    setContentView(R.layout.main_ui);
+
+    mTitle = getTitle();
+
+    final NavController navController =
+        ((NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment))
+            .getNavController();
+    final BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+    NavigationUI.setupWithNavController(bottomNavigationView, navController);
+  }
+
+  @Override
+  protected void onPostCreate(Bundle savedInstanceState) {
+    super.onPostCreate(savedInstanceState);
+    // applying my very own Edge-Effect color
+    EdgeEffectHacker.brandGlowEffect(this, ContextCompat.getColor(this, R.color.app_accent));
+
+    handlePermissionRequest(getIntent());
+  }
+
+  private void handlePermissionRequest(Intent intent) {
+    if (intent != null
+        && ACTION_REQUEST_PERMISSION_ACTIVITY.equals(intent.getAction())
+        && intent.hasExtra(EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY)) {
+      final String permission = intent.getStringExtra(EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY);
+      intent.removeExtra(EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY);
+      if (permission.equals(Manifest.permission.READ_CONTACTS)) {
+        startContactsPermissionRequest();
+      } else {
+        throw new IllegalArgumentException("Unknown permission request " + permission);
+      }
     }
+  }
 
-    @Override
-    protected void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        setContentView(R.layout.main_ui);
+  @AfterPermissionGranted(PermissionRequestHelper.CONTACTS_PERMISSION_REQUEST_CODE)
+  public void startContactsPermissionRequest() {
+    PermissionRequestHelper.check(this, PermissionRequestHelper.CONTACTS_PERMISSION_REQUEST_CODE);
+  }
 
-        mTitle = getTitle();
+  @Override
+  public void onRequestPermissionsResult(
+      int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    PermissionRequestHelper.onRequestPermissionsResult(
+        requestCode, permissions, grantResults, this);
+  }
 
-        final NavController navController =
-                ((NavHostFragment)
-                                getSupportFragmentManager()
-                                        .findFragmentById(R.id.nav_host_fragment))
-                        .getNavController();
-        final BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        NavigationUI.setupWithNavController(bottomNavigationView, navController);
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // applying my very own Edge-Effect color
-        EdgeEffectHacker.brandGlowEffect(this, ContextCompat.getColor(this, R.color.app_accent));
-
-        handlePermissionRequest(getIntent());
-    }
-
-    private void handlePermissionRequest(Intent intent) {
-        if (intent != null
-                && ACTION_REQUEST_PERMISSION_ACTIVITY.equals(intent.getAction())
-                && intent.hasExtra(EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY)) {
-            final String permission =
-                    intent.getStringExtra(EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY);
-            intent.removeExtra(EXTRA_KEY_ACTION_REQUEST_PERMISSION_ACTIVITY);
-            if (permission.equals(Manifest.permission.READ_CONTACTS)) {
-                startContactsPermissionRequest();
-            } else {
-                throw new IllegalArgumentException("Unknown permission request " + permission);
-            }
-        }
-    }
-
-    @AfterPermissionGranted(PermissionRequestHelper.CONTACTS_PERMISSION_REQUEST_CODE)
-    public void startContactsPermissionRequest() {
-        PermissionRequestHelper.check(
-                this, PermissionRequestHelper.CONTACTS_PERMISSION_REQUEST_CODE);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionRequestHelper.onRequestPermissionsResult(
-                requestCode, permissions, grantResults, this);
-    }
-
-    @Override
-    public void setTitle(CharSequence title) {
-        mTitle = title;
-        getSupportActionBar().setTitle(mTitle);
-    }
+  @Override
+  public void setTitle(CharSequence title) {
+    mTitle = title;
+    getSupportActionBar().setTitle(mTitle);
+  }
 }

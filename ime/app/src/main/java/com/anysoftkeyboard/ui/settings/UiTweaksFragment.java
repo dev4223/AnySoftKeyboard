@@ -19,17 +19,18 @@ package com.anysoftkeyboard.ui.settings;
 import android.os.Bundle;
 import androidx.preference.PreferenceFragmentCompat;
 import com.menny.android.anysoftkeyboard.R;
+import net.evendanan.pixel.UiUtils;
 
 public class UiTweaksFragment extends PreferenceFragmentCompat {
 
-    @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        addPreferencesFromResource(R.xml.prefs_ui_tweaks);
-    }
+  @Override
+  public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    addPreferencesFromResource(R.xml.prefs_ui_tweaks);
+  }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        MainSettingsActivity.setActivityTitle(this, getString(R.string.tweaks_group));
-    }
+  @Override
+  public void onStart() {
+    super.onStart();
+    UiUtils.setActivityTitle(this, getString(R.string.tweaks_group));
+  }
 }

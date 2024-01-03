@@ -21,14 +21,10 @@
     <string name="ui_theme_settings_tile">Оберіть та встановіть теми клавіатури.</string>
     <string name="ui_effects_settings_tile">Ефекти клавіатури й можливості.</string>
     <!-- welcome -->
-    <!-- changelog -->
-    <string name="changelog">Зміни</string>
-    <string name="search_market_for_addons">Пошук доповнень</string>
     <string name="search_market_for_keyboard_addons">Отримати більше клавіатур в <i>Google Play магазин</i>…</string>
     <string name="search_market_for_quick_key_addons">Отримати більш <i>Швидкий текст</i> додатки в <i>Google Play магазин</i>…</string>
-    <string name="no_market_store_available"><b>* Не вдалося знайти <i>Google Play магазин</i> на вашому пристрої. Не вдається шукати додаткові компоненти!</b></string>
     <string name="keyboard_theme_tweak_group">Твіки</string>
-    <string name="close_button">Закрити</string>
+    <string name="delete_button">Видалити</string>
     <!-- Indicates that a word has been added to the dictionary -->
     <string name="added_word">Вилучений: \u0020 <xliff:g id="word">%s </xliff:g>
     </string>
@@ -36,6 +32,7 @@
     <string name="removed_word">Вилучений: \u0020 <xliff:g id="word">%s </xliff:g>     </string>
     <string name="hint_add_to_dictionary">\u2190 Натисніть ще раз, щоб зберегти</string>
     <string name="hint_double_tap_to_close">Знову, щоб видалити пропозиції</string>
+    <string name="hint_click_for_inline_suggestions">Доступні пропозиції автозаповнення</string>
     <!-- voice -->
     <string name="voice_input_not_installed_title">Голосове введення не встановлено</string>
     <string name="voice_input_not_installed_text">Google\'s Voiceу не інстальовано на ваш пристрій. \nЦе може бути легко виправлено: встановити зараз з <i>Google Play Store</i>.</string>
@@ -53,6 +50,9 @@
     <string name="effects_group">Ефекти</string>
     <string name="ime_settings">Налаштування клавіатури</string>
     <string name="switch_incognito">Режим інкогніто</string>
+    <string name="use_system_vibration_title">Використовувати системну вібрацію</string>
+    <string name="use_system_vibration_off_summary">Використовувати власні налаштування вібрації</string>
+    <string name="use_system_vibration_on_summary">Використовувати системні налаштування вібрації Android</string>
     <string name="vibrate_on_key_press_title">Вібрувати при натисненні</string>
     <string name="night_mode_screen">Налаштування нічного режиму</string>
     <string name="night_mode_description">Нічний режим змінить такі функції:</string>
@@ -103,6 +103,9 @@
     <string name="switch_keyboard_on_space_on_summary">Перемикатись з символів на алфавіт по натисненню пробіла
     </string>
     <string name="switch_keyboard_on_space_off_summary">Не вмикати символи/цифри із розкладки при натисненні на кнопку пробіл     </string>
+    <string name="colorize_nav_bar_title">Малювати за межами панелі навігації</string>
+    <string name="colorize_nav_bar_summary_on">Буде намальовано фон клавіатури за межами панелі навігації. Не всі пристрої підтримують це.</string>
+    <string name="colorize_nav_bar_summary_off">Не малювати за межами панелі навігації.</string>
     <string name="persistent_layout_per_package_id_title">Запам\'ятайти алфавіт розкладки для кожної програми</string>
     <string name="persistent_layout_per_package_id_off_summary">Використовувати одну для усіх програм.</string>
     <string name="persistent_layout_per_package_id_on_summary">Автоматичне перемикання на попередню розкладку, використовуваної в програмі.</string>
@@ -183,6 +186,7 @@
     <string name="swipe_action_name_compact_layout_to_right">Компактне розміщення праворуч</string>
     <string name="swipe_action_name_compact_layout_to_left">Компактне розміщення ліворуч</string>
     <string name="swipe_action_name_utility_keyboard">Показати утиліту клавіатури</string>
+    <string name="swipe_action_name_quick_text_popup">Показувати вікно з emoji</string>
     <string name="settings_swipe_velocity_threshold_title">Межа швидкості ведення пальцем</string>
     <string name="settings_swipe_velocity_threshold_summary">Мінімальна швидкість жесту. В даний час %s</string>
     <string name="settings_swipe_velocity_very_slow">Дуже повільно</string>
@@ -206,6 +210,9 @@
     <string name="special_dictionaries_group_summary">Пропозиції словників, що використовуються в AnySoftKeyboard</string>
     <string name="use_user_dictionary">Словник користувача</string>
     <string name="use_user_dictionary_on_summary">Пропонувати користувачу додавання слів (двічі клацніть щоб додати набрану пропозицію)</string>
+    <string name="always_use_fallback_user_dictionary">Використовувати особисті словники користувача</string>
+    <string name="always_use_fallback_user_dictionary_on_summary">Використовувати вбудований в AnySoftKeyboard приватний словник користувача.</string>
+    <string name="always_use_fallback_user_dictionary_off_summary">Спробувати використати вбудований словник Android.</string>
     <string name="use_auto_dictionary">Авто словник</string>
     <string name="use_auto_dictionary_dialog_title">Виберіть метод навчання</string>
     <string name="use_auto_dictionary_summary">Автоматично запам’ятовувати нові слова. Метод навчання: %s</string>
@@ -323,6 +330,10 @@
     <string name="candidates_off_summary">Пропозиції не відображатимуться</string>
     <string name="quick_fix">Швидкі виправлення та скорочення</string>
     <string name="quick_fix_summary">Виправляє помилки надрукованих слів і розширює абревіатури</string>
+    <string name="quick_fix_secon_disabled">…тільки першою мовою</string>
+    <string name="quick_fix_secon_disabled_summ_on">Швидке виправлення і скорочення працюватиме лише на поточній розкладці</string>
+    <string name="quick_fix_secon_disabled_summ_off">Швидкі виправлення та абревіатури працюватимуть кожною мовою 
+                  зазначеною у перевизначенні стандартного словника</string>
     <string name="allow_suggestions_restart">Пропозиції заміни</string>
     <string name="allow_suggestions_restart_summary">Замінити на пропоноване слово рухом курсора</string>
     <!-- settings - keyboard group -->
@@ -387,6 +398,7 @@
     <string name="extension_kbd_bottom_alt_with_mic">Альтернативний з мікрофоном</string>
     <string name="extension_kbd_bottom_old">Старомодна</string>
     <string name="extension_kbd_bottom_simple">Простий</string>
+    <string name="extension_kbd_bottom_row_aosp">Стиль AOSP</string>
     <string name="extension_kbd_bottom_ng">Нова генерація - тестування</string>
     <string name="extension_kbd_extension_numbers_symbols">Цифри і символи</string>
     <!-- Tutorials -->
@@ -491,7 +503,6 @@
     <string name="created_mem_dump_file">Створення файлу дампа пам\'яті на: <xliff:g id="file_path">%s </xliff:g>     </string>
     <string name="not_configured_with_click_here">AnySoftKeyboard не є повністю налаштування для використання. Натисніть тут, щоб налаштувати.</string>
     <string name="not_configured_with_just_click_here">Натисніть тут</string>
-    <string name="click_for_more">більше…</string>
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
     <string name="word_editor_action_add_word">Додати слово</string>
@@ -507,7 +518,6 @@
     <string name="setup_wizard_step_one_action">Перейти до <i>Налаштування мови та вводу</i>…</string>
     <string name="setup_wizard_step_one_action_error_no_settings_activity">Помилка: Пристрій підтримує третіх сторін клавіатур. AnySoftKeyboard не може бути активований!</string>
     <string name="setup_wizard_step_permissions_title">Включити дозволи</string>
-    <string name="setup_wizard_step_permissions_details">На цьому кроці ви можете надати <i>AnySoftKeyboard</i> доступ до контактів, що зберігаються на вашому пристрої. Якщо Ви хочете заблокувати доступ, Ви можете відключити словник з контактів.</string>
     <string name="setup_wizard_step_two_title">Вибрати AnySoftKeyboard</string>
     <string name="setup_wizard_step_two_details">Ваша система може використовувати <i>AnySoftKeyboard</i> зараз, але він не встановлений як активна клавіатура. \nПри перемиканні, <i>AnySoftKeyboard</i> буде ваша нова екранна клавіатура, разом з усіма його функціями!</string>
     <string name="setup_wizard_step_two_action">Перемикатися між активними клавіатурами</string>
@@ -522,9 +532,6 @@
     <string name="setup_wizard_step_download_details">Ви будете раді дізнатися, що <i>AnySoftKeyboard</i> підтримує десятки мов. Просто завантажте потрібний мовний пакет і насолоджуйтеся друкуванням будь-якою мовою вашого пристрою.</string>
     <string name="setup_wizard_step_download_action">Завантажити мовний пакет</string>
     <string name="setup_wizard_step_download_skip_action">Пропустити</string>
-    <string name="ime_crashed_title">AnySoftKeyboard розбився!</string>
-    <string name="ime_crashed_sub_text">На жаль, не бачив, що йде …</string>
-    <string name="ime_crashed_ticker">На жаль, AnySoftKeyboard розбився, не бачив, що йде …</string>
     <string name="ime_crashed_text">На жаль, є проблема з  <i>AnySoftKeyboard</i>. Не панікуйте, є щось  <b>ви</b> може зробити, щоб допомогти вирішити цю проблему: послати нами звіт по аварії, і ми зробимо все можливе, щоб вирішити цю аварію і ви отримаєте назад з дивним досвідом клавіатури!\n\n З щирою вибаченням, команда Dev.</string>
     <string name="ime_crashed_send_button">Надіслати</string>
     <string name="ime_crashed_cancel_button">"Скасувати"</string>
@@ -541,10 +548,7 @@
     <string name="next_word_prefs_clear_data_summary">Цей процес необоротний. Буде видалено всю історію набору.</string>
     <string name="notification_read_contacts_title">Можна читати ваші контакти?</string>
     <string name="notification_read_contacts_text">Ми повинні читати ваші контакти, щоб дати вам краще автозаповнення.</string>
-    <string name="notification_read_contacts_ticker">Необхідний дозвіл для Контакти</string>
-    <string name="contacts_permissions_dialog_message">AnySoftKeyboard використовує ваші імена контактів, щоб надати вам персоналізовані пропозиції: при введенні слова, ми шукаємо подібні слова до автозаповнення і автоматичної корекції вашого друку.</string>
     <string name="wizard_allow_contacts_permission">Дозволити пропозиції на основі контактів</string>
-    <string name="allow_permission">Дозволити</string>
     <string name="turn_off_contacts_dictionary">Вимкнути словник Контакти</string>
     <string name="read_more_about_permissions">Прочитати більше про дозволи…</string>
     <string name="ask_beta_link_promo">Гей! Хочеш швидше отримувати нові функції <i>AnySoftKeyboard</i>? Тоді тобі пощастило! Канал <i>BETA</i> просто створено для <b>ТЕБЕ</b>!\пПросто зареєструйся за посиланням нижче та онови через <i>Google Play Маркет</i>!\n\nhttps://play.google.com/apps/testing/com.menny.android.anysoftkeyboard\n\nІ дякуємо за допомогу в усуненні помилок перед переходом нововведень в реліз.</string>
@@ -583,6 +587,10 @@
     <string name="theme_case_type_override_os">Нехай Android вирішує (Авто)</string>
     <string name="theme_case_type_override_lower">Завжди в нижньому регістрі</string>
     <string name="theme_case_type_override_upper">Завжди в верхньому регістрі</string>
+    <string name="settings_key_hint_size_none">Немає</string>
+    <string name="settings_key_hint_size_small">Маленький</string>
+    <string name="settings_key_hint_size_normal">Нормальний</string>
+    <string name="settings_key_hint_size_big">Великий</string>
     <string name="theme_case_type_override_title">Перевизначити регістр літер клавіатури</string>
     <string name="theme_case_type_override_summary">Як визначити букв у вікні клавіатури. В даний час, %s</string>
     <string name="take_a_while_progress_message">Будь ласка, зачекайте…</string>
@@ -615,4 +623,6 @@
     <string name="aosp_dark_theme_description">AOSP-навіяна тема темних кольорів клавіатури</string>
     <string name="aosp_light_theme_name">AOSP Світла тема</string>
     <string name="aosp_light_theme_description">AOSP-навіяна тема світлих кольорів клавіатури</string>
+    <string name="app_share_title">Вітаємо в AnySoftKeyboard</string>
+    <string name="backup_restore_not_support_before_kitkat">Не підтримується на вашому Android</string>
 </resources>
