@@ -153,8 +153,8 @@ public abstract class AnyKeyboard extends Keyboard {
     mDisplayWidth = newWidth;
     final double zoomFactor = ((double) newWidth) / ((double) oldWidth);
     for (Key key : getKeys()) {
-      key.x = (int) (zoomFactor * key.x);
       key.width = (int) (zoomFactor * key.width);
+      key.x = (int) (zoomFactor * key.x);
     }
   }
 
@@ -330,7 +330,6 @@ public abstract class AnyKeyboard extends Keyboard {
       // pushing the originals keys down a bit
       for (Key key : keys) {
         key.y += genericRowsHeight;
-        key.centerY = key.y + key.height / 2;
       }
     }
 
@@ -339,8 +338,7 @@ public abstract class AnyKeyboard extends Keyboard {
     final List<Key> rowKeys = genericRowKeyboard.getKeys();
     for (Key rowKey : rowKeys) {
       rowKey.y += rowKeyYOffset;
-      rowKey.centerY = rowKey.y + rowKey.height / 2;
-      final int rowWidth = rowKey.x + rowKey.width;
+      final int rowWidth = Key.getEndX(rowKey);
       if (rowWidth > mMaxGenericRowsWidth) mMaxGenericRowsWidth = rowWidth;
       keys.add(rowKeyInsertIndex, rowKey);
       rowKeyInsertIndex++;
@@ -388,7 +386,8 @@ public abstract class AnyKeyboard extends Keyboard {
       return new char[0];
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public CharSequence getKeyboardName() {
       return "not important";
     }
@@ -398,7 +397,8 @@ public abstract class AnyKeyboard extends Keyboard {
       return AddOn.INVALID_RES_ID;
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public String getKeyboardId() {
       return "no-important";
     }
@@ -437,7 +437,8 @@ public abstract class AnyKeyboard extends Keyboard {
 
   public abstract String getDefaultDictionaryLocale();
 
-  @NonNull public Locale getLocale() {
+  @NonNull
+  public Locale getLocale() {
     return Locale.ROOT;
   }
 
@@ -486,7 +487,8 @@ public abstract class AnyKeyboard extends Keyboard {
   }
 
   @Override
-  @Nullable protected Row createRowFromXml(
+  @Nullable
+  protected Row createRowFromXml(
       @NonNull AddOn.AddOnResourceMapping resourceMapping,
       Resources res,
       XmlResourceParser parser,
@@ -534,7 +536,8 @@ public abstract class AnyKeyboard extends Keyboard {
     mEnterKey.enable();
   }
 
-  @NonNull public abstract CharSequence getKeyboardName();
+  @NonNull
+  public abstract CharSequence getKeyboardName();
 
   public boolean isLeftToRightLanguage() {
     return !mRightToLeftLayout;
@@ -640,7 +643,8 @@ public abstract class AnyKeyboard extends Keyboard {
     return false;
   }
 
-  @NonNull public abstract String getKeyboardId();
+  @NonNull
+  public abstract String getKeyboardId();
 
   @KeyboardRowModeId
   public int getKeyboardMode() {
@@ -835,7 +839,8 @@ public abstract class AnyKeyboard extends Keyboard {
       return super.getCurrentDrawableState(provider);
     }
 
-    @NonNull public List<String> getKeyTags() {
+    @NonNull
+    public List<String> getKeyTags() {
       return mKeyTags;
     }
 

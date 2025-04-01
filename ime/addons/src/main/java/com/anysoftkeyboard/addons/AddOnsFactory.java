@@ -26,6 +26,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.text.TextUtils;
@@ -126,7 +127,8 @@ public abstract class AddOnsFactory<E extends AddOn> {
     }
   }
 
-  @Nullable protected static CharSequence getTextFromResourceOrText(
+  @Nullable
+  protected static CharSequence getTextFromResourceOrText(
       Context context, AttributeSet attrs, String attributeName) {
     final int stringResId =
         attrs.getAttributeResourceValue(null, attributeName, AddOn.INVALID_RES_ID);
@@ -154,6 +156,17 @@ public abstract class AddOnsFactory<E extends AddOn> {
       }
     }
     if (cleared) ime.onAddOnsCriticalChange();
+  }
+
+  public static void onConfigurationChanged(
+      @NonNull Configuration newConfig, AddOnsFactory<?>... factories) {
+    for (AddOnsFactory<?> factory : factories) {
+      for (AddOn addOn : factory.mAddOns) {
+        if (addOn instanceof AddOnImpl) {
+          ((AddOnImpl) addOn).setNewConfiguration(newConfig);
+        }
+      }
+    }
   }
 
   public final List<E> getEnabledAddOns() {
@@ -451,7 +464,8 @@ public abstract class AddOnsFactory<E extends AddOn> {
     return addOns;
   }
 
-  @Nullable private E createAddOnFromXmlAttributes(AttributeSet attrs, Context packContext) {
+  @Nullable
+  private E createAddOnFromXmlAttributes(AttributeSet attrs, Context packContext) {
     final CharSequence prefId =
         getTextFromResourceOrText(packContext, attrs, XML_PREF_ID_ATTRIBUTE);
     final CharSequence name =

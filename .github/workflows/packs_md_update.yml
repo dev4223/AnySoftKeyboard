@@ -1,6 +1,5 @@
 ---
 name: packs-lists
-
 on:
   push:
     branches:
@@ -8,25 +7,29 @@ on:
     paths:
       - 'addons/**'
       - '.github/workflows/packs_md_update.yml'
-
 env:
   TERM: dumb
   TMPDIR: "/tmp"
-
 jobs:
   packs-md-update:
-    runs-on: ubuntu-22.04
-    container: ghcr.io/menny/android_ndk:1.19.0
+    runs-on: ubuntu-24.04
+    container: ghcr.io/menny/android:1.21.2
     steps:
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v4.2.2
         with:
           token: ${{ secrets.BOT_MASTER_RW_GITHUB_TOKEN }}
       - name: setup
         run: ./scripts/ci/ci_setup.sh
       - name: update packs list
         run: ./gradlew :addons:languages:generatePacksMarkDown :addons:themes:generatePacksMarkDown :addons:quicktexts:generatePacksMarkDown
+      - uses: bazel-contrib/setup-bazel@0.9.1
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - run: bazel run //:format
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v5.0.1
+        uses: peter-evans/create-pull-request@v7.0.5
         with:
           token: ${{ secrets.BOT_MASTER_RW_GITHUB_TOKEN }}
           commit-message: 'Automated Packs List Update'

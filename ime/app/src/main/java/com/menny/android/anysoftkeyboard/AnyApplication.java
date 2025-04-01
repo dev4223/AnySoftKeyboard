@@ -289,11 +289,26 @@ public class AnyApplication extends MultiDexApplication {
     return Collections.unmodifiableList(mPublicNotices);
   }
 
+  public void setNewConfigurationToAllAddOns(@NonNull Configuration newConfiguration) {
+    // this may affect how add-ons are behaving
+    // we'll need to recreate their Context (at the least)
+    AddOnsFactory.onConfigurationChanged(
+        newConfiguration,
+        mTopRowFactory,
+        mBottomRowFactory,
+        mExtensionKeyboardFactory,
+        mExternalDictionaryFactory,
+        mKeyboardFactory,
+        mKeyboardThemeFactory,
+        mQuickTextKeyFactory);
+  }
+
   @Override
   public void onConfigurationChanged(@NonNull Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     mNightModeSubject.onNext(
         (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES);
+    setNewConfigurationToAllAddOns(newConfig);
   }
 
   @Override
@@ -335,15 +350,18 @@ public class AnyApplication extends MultiDexApplication {
     }
   }
 
-  @NonNull protected QuickTextKeyFactory createQuickTextKeyFactory() {
+  @NonNull
+  protected QuickTextKeyFactory createQuickTextKeyFactory() {
     return new QuickTextKeyFactory(this);
   }
 
-  @NonNull protected KeyboardThemeFactory createKeyboardThemeFactory() {
+  @NonNull
+  protected KeyboardThemeFactory createKeyboardThemeFactory() {
     return new KeyboardThemeFactory(this);
   }
 
-  @NonNull protected KeyboardExtensionFactory createToolsKeyboardExtensionFactory() {
+  @NonNull
+  protected KeyboardExtensionFactory createToolsKeyboardExtensionFactory() {
     return new KeyboardExtensionFactory(
         this,
         R.string.settings_default_ext_keyboard_key,
@@ -351,7 +369,8 @@ public class AnyApplication extends MultiDexApplication {
         KeyboardExtension.TYPE_EXTENSION);
   }
 
-  @NonNull protected KeyboardExtensionFactory createTopKeyboardExtensionFactory() {
+  @NonNull
+  protected KeyboardExtensionFactory createTopKeyboardExtensionFactory() {
     return new KeyboardExtensionFactory(
         this,
         R.string.settings_default_top_row_key,
@@ -359,7 +378,8 @@ public class AnyApplication extends MultiDexApplication {
         KeyboardExtension.TYPE_TOP);
   }
 
-  @NonNull protected KeyboardExtensionFactory createBottomKeyboardExtensionFactory() {
+  @NonNull
+  protected KeyboardExtensionFactory createBottomKeyboardExtensionFactory() {
     return new KeyboardExtensionFactory(
         this,
         R.string.settings_default_ext_kbd_bottom_row_key,
@@ -367,11 +387,13 @@ public class AnyApplication extends MultiDexApplication {
         KeyboardExtension.TYPE_BOTTOM);
   }
 
-  @NonNull protected ExternalDictionaryFactory createExternalDictionaryFactory() {
+  @NonNull
+  protected ExternalDictionaryFactory createExternalDictionaryFactory() {
     return new ExternalDictionaryFactory(this);
   }
 
-  @NonNull protected KeyboardFactory createKeyboardFactory() {
+  @NonNull
+  protected KeyboardFactory createKeyboardFactory() {
     return new KeyboardFactory(this);
   }
 
@@ -445,12 +467,14 @@ public class AnyApplication extends MultiDexApplication {
       super(app, previous, notificationDriver);
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     protected Intent createBugReportingActivityIntent() {
       return new Intent(mApp, SendBugReportUiActivity.class);
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     protected String getAppDetails() {
       return DeveloperUtils.getAppDetails(mApp);
     }

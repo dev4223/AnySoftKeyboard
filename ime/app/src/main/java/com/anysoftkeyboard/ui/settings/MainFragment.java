@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
@@ -311,13 +310,7 @@ public class MainFragment extends Fragment {
     switch (optionId) {
       case R.id.backup_prefs:
       case R.id.restore_prefs:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-          onBackupRestoreDialogRequired(builder, optionId);
-        } else {
-          builder.setTitle(R.string.backup_restore_not_support_before_kitkat);
-          builder.setMessage(R.string.backup_restore_not_support_before_kitkat_message);
-          builder.setPositiveButton(android.R.string.ok, null);
-        }
+        onBackupRestoreDialogRequired(builder, optionId);
         break;
       case DIALOG_SAVE_SUCCESS:
         builder.setTitle(R.string.prefs_providers_operation_success);
@@ -344,7 +337,6 @@ public class MainFragment extends Fragment {
     }
   }
 
-  @RequiresApi(Build.VERSION_CODES.KITKAT)
   private void onBackupRestoreDialogRequired(AlertDialog.Builder builder, int optionId) {
     @StringRes final int actionTitle;
 
@@ -360,8 +352,9 @@ public class MainFragment extends Fragment {
         intentAction = Intent.ACTION_OPEN_DOCUMENT;
         builder.setTitle(R.string.pick_prefs_providers_to_restore);
       }
-      default -> throw new IllegalArgumentException(
-          "The option-id " + optionId + " is not supported here.");
+      default ->
+          throw new IllegalArgumentException(
+              "The option-id " + optionId + " is not supported here.");
     }
 
     supportedProviders = GlobalPrefsBackup.getAllPrefsProviders(requireContext());
@@ -413,12 +406,12 @@ public class MainFragment extends Fragment {
       action =
           listPair ->
               GlobalPrefsBackup.backup(
-                  listPair, getContext().getContentResolver().openOutputStream(filePath));
+                  listPair, requireContext().getContentResolver().openOutputStream(filePath));
     } else {
       action =
           listPair ->
               GlobalPrefsBackup.restore(
-                  listPair, getContext().getContentResolver().openInputStream(filePath));
+                  listPair, requireContext().getContentResolver().openInputStream(filePath));
     }
 
     return RxProgressDialog.create(

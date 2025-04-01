@@ -326,6 +326,9 @@
     <string name="key_press_preview_popup_off_summary">Nincs felugró karakter gombnyomáskor</string>
     <string name="zoom_factor_keys_in_portrait">Gomb magassága álló módban</string>
     <string name="zoom_factor_keys_in_landscape">Gomb magassága fekvő módban</string>
+    <string name="keys_zoom_factor_template">%d%%</string>
+    <string name="bottom_padding_in_dp_title">Billentyűzet alsó eltolás</string>
+    <string name="bottom_padding_in_dp_template">%d pont</string>
     <string name="insert_space_after_word_suggestion_selection">Szó választása után szóköz</string>
     <string name="insert_space_after_word_suggestion_selection_on_summary">Szóköz a javasolt szó
         kiválasztása után
@@ -573,6 +576,7 @@
     <string name="not_configured_with_click_here">Az AnySoftKeyboard még nem használatra kész. Kattintson
         a beállításhoz.
     </string>
+    <string name="not_notification_permission_text">Az AnySoftKeyboard-nak nincs engedélye értesítések megjelenítésére. Ritkán előfordulhat, hogy értesítenünk kellene Önt kritikus problémákról (például összeomlások).</string>
     <string name="not_configured_with_just_click_here">Kattintson</string>
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
@@ -728,8 +732,12 @@
     <string name="app_share_menu_title">AnySoftKeyboard megosztása ezzel</string>
     <string name="app_share_text">Hadd javasoljuk a nyílt forráskódú, ingyenes, jól testreszabható, többnyelvű Android billentyűzetalkalmazást, az AnySoftKeyboard-ot.\nLetöltés:\nPlay Store: https://play.google.com/store/apps/details?id=com.menny.android.anysoftkeyboard\nF-Droid: https://f-droid.org/en/packages/com.menny.android.anysoftkeyboard/</string>
     <string name="click_me_for_easter_egg_info">Kattintson egy meglepetéshez</string>
-    <string name="backup_restore_not_support_before_kitkat">Nem támogatott ezen az Android verzión</string>
-    <string name="backup_restore_not_support_before_kitkat_message">A biztonsági mentés és visszaállítás nem támogatott a KitKat (4.4-es verzió) előtti Android operációs rendszert futtató eszközökön. Sajnálom.</string>
+    
+    
     <string name="delete_all_clipboard_entries">Vágólap törlése</string>
     <string name="tip_swipe_from_backspace_to_clear">Tipp: a szóközről balra húzva törölheted a szót!</string>
+    <string name="notification_read_contacts_ticker">Névjegyek elérése engedély szükséges</string>
+    <string name="wizard_allow_notification_permission">Értesítések fogadása az AnySoftKeyboard-tól</string>
+    <string name="setup_wizard_step_notification_permissions_details">Ritka esetekben (például alkalmazásösszeomlás esetén) eszközértesítést kell megjelenítenünk. Ez ajánlott, de az értesítések letiltása nem befolyásolja az alkalmazás működését.</string>
+    <string name="wizard_skip_notification_permission">Ne küldjön éresítéseket</string>
 </resources>

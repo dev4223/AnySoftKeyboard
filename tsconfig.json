@@ -1,9 +1,16 @@
 {
-    "compilerOptions": {
-        "allowJs": true,
-        "target": "es5",
-        "outDir": "dist/",
-        "rootDir": "js/"
-    },
-    "include": ["js/**/*"]
+  "compilerOptions": {
+    "isolatedDeclarations": true,
+    "composite": true,
+    "isolatedModules": true,
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "target": "es2023",
+    "inlineSourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "skipLibCheck": true
+  },
+  "include": ["js/**/*"]
 }

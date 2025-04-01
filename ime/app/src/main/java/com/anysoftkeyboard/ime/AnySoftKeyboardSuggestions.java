@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -110,7 +109,6 @@ public abstract class AnySoftKeyboardSuggestions extends AnySoftKeyboardKeyboard
    */
   private boolean mShowSuggestions = false;
   private boolean mAutoComplete;
-  private int mOrientation;
 
   private static void fillSeparatorsSparseArray(
       SparseBooleanArray sparseBooleanArray, char[] chars) {
@@ -118,11 +116,13 @@ public abstract class AnySoftKeyboardSuggestions extends AnySoftKeyboardKeyboard
     for (char separator : chars) sparseBooleanArray.put(separator, true);
   }
 
-  @Nullable protected Keyboard.Key getLastUsedKey() {
+  @Nullable
+  protected Keyboard.Key getLastUsedKey() {
     return mLastKey;
   }
 
-  @NonNull private static CompletionInfo[] copyCompletionsFromAndroid(
+  @NonNull
+  private static CompletionInfo[] copyCompletionsFromAndroid(
       @Nullable CompletionInfo[] completions) {
     if (completions == null) {
       return new CompletionInfo[0];
@@ -134,8 +134,6 @@ public abstract class AnySoftKeyboardSuggestions extends AnySoftKeyboardKeyboard
   @Override
   public void onCreate() {
     super.onCreate();
-
-    mOrientation = getResources().getConfiguration().orientation;
 
     mSuggest = createSuggest();
 
@@ -767,15 +765,10 @@ public abstract class AnySoftKeyboardSuggestions extends AnySoftKeyboardKeyboard
   private boolean isSpaceSwapCharacter(int primaryCode) {
     if (isSentenceSeparator(primaryCode)) {
       if (mFrenchSpacePunctuationBehavior) {
-        switch (primaryCode) {
-          case '!':
-          case '?':
-          case ':':
-          case ';':
-            return false;
-          default:
-            return true;
-        }
+        return switch (primaryCode) {
+          case '!', '?', ':', ';' -> false;
+          default -> true;
+        };
       } else {
         return true;
       }
@@ -928,27 +921,24 @@ public abstract class AnySoftKeyboardSuggestions extends AnySoftKeyboardKeyboard
     }
   }
 
-  @NonNull protected DictionaryBackgroundLoader.Listener getDictionaryLoadedListener(
+  @NonNull
+  protected DictionaryBackgroundLoader.Listener getDictionaryLoadedListener(
       @NonNull AnyKeyboard currentAlphabetKeyboard) {
     return NO_OP_DICTIONARY_LOADER_LISTENER;
   }
 
   @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    if (newConfig.orientation != mOrientation) {
-      mOrientation = newConfig.orientation;
+  protected void onOrientationChanged(int oldOrientation, int newOrientation) {
+    super.onOrientationChanged(oldOrientation, newOrientation);
+    abortCorrectionAndResetPredictionState(false);
 
-      abortCorrectionAndResetPredictionState(false);
-
-      String sentenceSeparatorsForCurrentKeyboard =
-          getKeyboardSwitcher().getCurrentKeyboardSentenceSeparators();
-      if (sentenceSeparatorsForCurrentKeyboard == null) {
-        mSentenceSeparators.clear();
-      } else {
-        fillSeparatorsSparseArray(
-            mSentenceSeparators, sentenceSeparatorsForCurrentKeyboard.toCharArray());
-      }
+    String sentenceSeparatorsForCurrentKeyboard =
+        getKeyboardSwitcher().getCurrentKeyboardSentenceSeparators();
+    if (sentenceSeparatorsForCurrentKeyboard == null) {
+      mSentenceSeparators.clear();
+    } else {
+      fillSeparatorsSparseArray(
+          mSentenceSeparators, sentenceSeparatorsForCurrentKeyboard.toCharArray());
     }
   }
 
@@ -1023,12 +1013,14 @@ public abstract class AnySoftKeyboardSuggestions extends AnySoftKeyboardKeyboard
     }
   }
 
-  @NonNull protected Suggest getSuggest() {
+  @NonNull
+  protected Suggest getSuggest() {
     return mSuggest;
   }
 
   @Override
-  @NonNull protected List<Drawable> generateWatermark() {
+  @NonNull
+  protected List<Drawable> generateWatermark() {
     final List<Drawable> watermark = super.generateWatermark();
     if (mSuggest.isIncognitoMode()) {
       watermark.add(ContextCompat.getDrawable(this, R.drawable.ic_watermark_incognito));
@@ -1036,7 +1028,8 @@ public abstract class AnySoftKeyboardSuggestions extends AnySoftKeyboardKeyboard
     return watermark;
   }
 
-  @NonNull protected Suggest createSuggest() {
+  @NonNull
+  protected Suggest createSuggest() {
     return new SuggestImpl(this);
   }
 

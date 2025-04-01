@@ -46,9 +46,10 @@ import com.menny.android.anysoftkeyboard.AnyApplication;
 import com.menny.android.anysoftkeyboard.R;
 import java.util.ArrayList;
 import java.util.List;
+import net.evendanan.pixel.MainChild;
 
 public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw
-    implements InputViewBinder, ActionsStripSupportedChild {
+    implements InputViewBinder, ActionsStripSupportedChild, MainChild {
 
   private static final int DELAY_BEFORE_POPPING_UP_EXTENSION_KBD = 35; // milliseconds
   private static final String TAG = "ASKKbdView";
@@ -63,6 +64,7 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw
   private boolean mExtensionVisible = false;
   private int mExtensionKeyboardYActivationPoint;
   private int mExtensionKeyboardYDismissPoint;
+  private int mDismissYValue = Integer.MAX_VALUE;
   private Keyboard.Key mExtensionKey;
   private Keyboard.Key mUtilityKey;
   private Keyboard.Key mSpaceBarKey = null;
@@ -127,6 +129,7 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw
                 GenericOnError.onError("settings_key_is_sticky_extesion_keyboard")));
   }
 
+  @Override
   public void setBottomOffset(int extraBottomOffset) {
     mExtraBottomOffset = Math.max(extraBottomOffset, mMinimumKeyboardBottomPadding);
     setPadding(
@@ -201,7 +204,10 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw
     }
 
     final Keyboard.Key lastKey = newKeyboard.getKeys().get(newKeyboard.getKeys().size() - 1);
-    mWatermarkEdgeX = lastKey.x + lastKey.width;
+    mWatermarkEdgeX = Keyboard.Key.getEndX(lastKey);
+    mDismissYValue =
+        newKeyboard.getHeight()
+            + getResources().getDimensionPixelOffset(R.dimen.dismiss_keyboard_point);
   }
 
   @Override
@@ -258,8 +264,24 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw
       mGestureTypingPathShouldBeDrawn = false;
     }
 
-    // If the motion event is above the keyboard and it's a MOVE event
-    // coming even before the first MOVE event into the extension area
+    // If the motion event is outside (up or down) the keyboard and it's a MOVE event
+    // coming even before the first MOVE event into the extension/bottom area
+    if (action == MotionEvent.ACTION_MOVE && me.getY() > mDismissYValue) {
+      MotionEvent cancel =
+          MotionEvent.obtain(
+              me.getDownTime(),
+              me.getEventTime(),
+              MotionEvent.ACTION_CANCEL,
+              me.getX(),
+              me.getY(),
+              0);
+      super.onTouchEvent(cancel);
+      mGestureDetector.onTouchEvent(cancel);
+      cancel.recycle();
+      mKeyboardActionListener.onSwipeDown();
+      // Touch handled
+      return true;
+    }
     if (!mIsFirstDownEventInsideSpaceBar
         && me.getY() < mExtensionKeyboardYActivationPoint
         && !mMiniKeyboardPopup.isShowing()
@@ -302,7 +324,7 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw
             mExtensionKey.y = mExtensionKeyboardPopupOffset;
           }
           // so the popup will be right above your finger.
-          mExtensionKey.x = (int) me.getX();
+          mExtensionKey.x = ((int) me.getX());
 
           onLongPress(extKbd, mExtensionKey, mIsStickyExtensionKeyboard, getPointerTracker(me));
           return true;

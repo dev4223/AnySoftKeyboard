@@ -130,7 +130,8 @@ public class AnyKeyboardViewWithMiniKeyboard extends SizeSensitiveAnyKeyboardVie
         MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.AT_MOST));
   }
 
-  @NonNull protected AnyPopupKeyboard createPopupKeyboardForKey(
+  @NonNull
+  protected AnyPopupKeyboard createPopupKeyboardForKey(
       @NonNull AddOn keyboardAddOn, @NonNull Keyboard.Key popupKey) {
     if (popupKey.popupCharacters != null) {
       // in this case, we must use ASK's context to inflate views and XMLs
@@ -259,7 +260,8 @@ public class AnyKeyboardViewWithMiniKeyboard extends SizeSensitiveAnyKeyboardVie
 
     setPopupKeyboardWithView(x, y, originX, originY, mMiniKeyboard);
 
-    setPopupStickinessValues(isSticky, !isSticky, popupKey.centerX, popupKey.centerY);
+    setPopupStickinessValues(
+        isSticky, !isSticky, Keyboard.Key.getCenterX(popupKey), Keyboard.Key.getCenterY(popupKey));
 
     dismissAllKeyPreviews();
 

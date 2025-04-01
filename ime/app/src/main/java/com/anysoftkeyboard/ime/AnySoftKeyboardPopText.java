@@ -56,14 +56,14 @@ public abstract class AnySoftKeyboardPopText extends AnySoftKeyboardPowerSaving 
     switch (newValue) {
       case "any_key":
         mPopTextOnKeyPress = true;
-        // letting the switch cases to fall-through - each value level enables additional
-        // flag
-        // fall through
+      // letting the switch cases to fall-through - each value level enables additional
+      // flag
+      // fall through
       case "on_word":
         mPopTextOnWord = true;
-        // letting the switch cases to fall-through - each value level enables additional
-        // flag
-        // fall through
+      // letting the switch cases to fall-through - each value level enables additional
+      // flag
+      // fall through
       case "on_correction":
         mPopTextOnCorrection = true;
         break;
@@ -90,7 +90,7 @@ public abstract class AnySoftKeyboardPopText extends AnySoftKeyboardPowerSaving 
       mLastTextPop =
           new PopTextExtraDraw.PopOut(
               textToPop,
-              new Point(lastKey.x + lastKey.width / 2, lastKey.y),
+              new Point(Keyboard.Key.getCenterX(lastKey), lastKey.y),
               lastKey.y - anyKeyboardViewWithExtraDraw.getHeight() / 2);
       anyKeyboardViewWithExtraDraw.addExtraDraw(mLastTextPop);
     }

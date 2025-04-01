@@ -329,12 +329,24 @@ public abstract class Keyboard {
     /** X coordinate of the key in the mKeyboard layout */
     public int x;
 
-    public int centerX;
+    public static int getCenterX(@NonNull final Key k) {
+      return k.x + k.width / 2;
+    }
+
+    public static int getEndX(@NonNull final Key k) {
+      return k.x + k.width;
+    }
 
     /** Y coordinate of the key in the mKeyboard layout */
     public int y;
 
-    public int centerY;
+    public static int getCenterY(@NonNull final Key k) {
+      return k.y + k.height / 2;
+    }
+
+    public static int getEndY(@NonNull final Key k) {
+      return k.y + k.height;
+    }
 
     /** The current pressed state of this key */
     public boolean pressed;
@@ -468,9 +480,6 @@ public abstract class Keyboard {
         mCodes = new int[] {Character.codePointAt(label, 0)};
       }
       a.recycle();
-
-      centerX = x + width / 2;
-      centerY = y + height / 2;
 
       if (shiftedText == null) {
         shiftedText = text;
@@ -709,7 +718,8 @@ public abstract class Keyboard {
     mModifierKeys = new ArrayList<>();
   }
 
-  @NonNull public AddOn getKeyboardAddOn() {
+  @NonNull
+  public AddOn getKeyboardAddOn() {
     return mAddOn;
   }
 
@@ -742,11 +752,11 @@ public abstract class Keyboard {
     mTotalWidth = 0;
     mTotalHeight = 0;
     for (Key key : mKeys) {
-      int x = key.x + key.gap + key.width;
+      int x = Key.getEndX(key) + key.gap;
       if (x > mTotalWidth) {
         mTotalWidth = x;
       }
-      int y = key.y + key.height;
+      int y = Key.getEndY(key);
       if (y > mTotalHeight) {
         mTotalHeight = y;
       }
@@ -765,7 +775,8 @@ public abstract class Keyboard {
     return mShifted;
   }
 
-  @Nullable public Key getShiftKey() {
+  @Nullable
+  public Key getShiftKey() {
     return mShiftKey;
   }
 
@@ -818,7 +829,8 @@ public abstract class Keyboard {
     return new int[0];
   }
 
-  @Nullable protected Row createRowFromXml(
+  @Nullable
+  protected Row createRowFromXml(
       @NonNull AddOn.AddOnResourceMapping resourceMapping,
       Resources res,
       XmlResourceParser parser,
@@ -1018,7 +1030,8 @@ public abstract class Keyboard {
     return defValue;
   }
 
-  @NonNull AddOn.AddOnResourceMapping getKeyboardResourceMap() {
+  @NonNull
+  AddOn.AddOnResourceMapping getKeyboardResourceMap() {
     return mKeyboardResourceMap;
   }
 }

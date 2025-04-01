@@ -29,6 +29,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
@@ -126,15 +128,14 @@ public class MainFragmentTest extends RobolectricFragmentTestCase<MainFragment> 
     Assert.assertNotNull(changeLogCard);
     final TextView title = changeLogCard.findViewById(R.id.changelog_version_title);
     Assert.assertNotNull(title);
+    String actual = title.getText().toString().trim();
+    var matchRegex =
+        getApplicationContext()
+            .getString(R.string.change_log_card_version_title_template, ".+")
+            .trim();
     Assert.assertTrue(
-        title
-            .getText()
-            .toString()
-            .trim()
-            .startsWith(
-                getApplicationContext()
-                    .getString(R.string.change_log_card_version_title_template, "")
-                    .trim()));
+        String.format(Locale.ROOT, "'%s' should match with '%s'", actual, matchRegex),
+        Pattern.matches(matchRegex, actual));
     Assert.assertEquals(View.VISIBLE, title.getVisibility());
   }
 
@@ -174,46 +175,6 @@ public class MainFragmentTest extends RobolectricFragmentTestCase<MainFragment> 
     Fragment aboutFragment = getCurrentFragment();
     Assert.assertNotNull(aboutFragment);
     Assert.assertTrue(aboutFragment instanceof MainTweaksFragment);
-  }
-
-  @Test
-  @Config(sdk = Build.VERSION_CODES.JELLY_BEAN_MR2)
-  public void testBackupMenuItemNotSupportedPreKitKat() throws Exception {
-    final MainFragment fragment = startFragment();
-    final FragmentActivity activity = fragment.getActivity();
-
-    Menu menu = Shadows.shadowOf(activity).getOptionsMenu();
-    Assert.assertNotNull(menu);
-    final MenuItem item = menu.findItem(R.id.backup_prefs);
-
-    fragment.onOptionsItemSelected(item);
-    TestRxSchedulers.foregroundFlushAllJobs();
-
-    final AlertDialog dialog = GeneralDialogTestUtil.getLatestShownDialog();
-    Assert.assertNotSame(GeneralDialogTestUtil.NO_DIALOG, dialog);
-    Assert.assertEquals(
-        getApplicationContext().getText(R.string.backup_restore_not_support_before_kitkat),
-        GeneralDialogTestUtil.getTitleFromDialog(dialog));
-  }
-
-  @Test
-  @Config(sdk = Build.VERSION_CODES.JELLY_BEAN_MR2)
-  public void testRestoreMenuItemNotSupportedPreKitKat() throws Exception {
-    final MainFragment fragment = startFragment();
-    final FragmentActivity activity = fragment.getActivity();
-
-    Menu menu = Shadows.shadowOf(activity).getOptionsMenu();
-    Assert.assertNotNull(menu);
-    final MenuItem item = menu.findItem(R.id.restore_prefs);
-
-    fragment.onOptionsItemSelected(item);
-    TestRxSchedulers.foregroundFlushAllJobs();
-
-    final AlertDialog dialog = GeneralDialogTestUtil.getLatestShownDialog();
-    Assert.assertNotSame(GeneralDialogTestUtil.NO_DIALOG, dialog);
-    Assert.assertEquals(
-        getApplicationContext().getText(R.string.backup_restore_not_support_before_kitkat),
-        GeneralDialogTestUtil.getTitleFromDialog(dialog));
   }
 
   @Test

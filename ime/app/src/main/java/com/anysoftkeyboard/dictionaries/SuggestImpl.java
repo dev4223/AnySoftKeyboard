@@ -253,9 +253,10 @@ public class SuggestImpl implements Suggest {
     // with the typed word. These suggestions are top priority, so they will be added
     // at the top of the list
     final int typedWordLength = mLowerOriginalWord.length();
+    // next-word beats any suggestion OTHER than identical typed
+    int nextWordInsertionIndex = mCorrectSuggestionIndex == 0 ? 1 : 0;
     // since the next-word-suggestions are order by usage, we'd like to add them at the
     // same order
-    int nextWordInsertionIndex = 0;
     for (CharSequence nextWordSuggestion : mNextSuggestions) {
       if (nextWordSuggestion.length() >= typedWordLength
           && TextUtils.equals(
@@ -555,7 +556,8 @@ public class SuggestImpl implements Suggest {
     }
   }
 
-  @NonNull private StringBuilder getStringBuilderFromPool(char[] word, int wordOffset, int wordLength) {
+  @NonNull
+  private StringBuilder getStringBuilderFromPool(char[] word, int wordOffset, int wordLength) {
     int poolSize = mStringPool.size();
     StringBuilder sb =
         poolSize > 0

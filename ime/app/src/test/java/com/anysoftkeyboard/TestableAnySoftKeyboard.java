@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,7 +69,7 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
   private InputMethodManager mSpiedInputMethodManager;
   private int mLastOnKeyPrimaryCode;
   private AbstractInputMethodImpl mCreatedInputMethodInterface;
-  private AbstractInputMethodSessionImpl mCreatedInputMethodSession;
+  private InputMethodSession mCreatedInputMethodSession;
 
   private OverlyDataCreator mOriginalOverlayDataCreator;
   private OverlyDataCreator mSpiedOverlayCreator;
@@ -92,7 +93,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     return editorInfo;
   }
 
-  @Nullable public static Keyboard.Key findKeyWithPrimaryKeyCode(int keyCode, AnyKeyboard keyboard) {
+  @Nullable
+  public static Keyboard.Key findKeyWithPrimaryKeyCode(int keyCode, AnyKeyboard keyboard) {
     for (Keyboard.Key aKey : keyboard.getKeys()) {
       if (aKey.getPrimaryCode() == keyCode) {
         return aKey;
@@ -180,7 +182,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
   }
 
   @VisibleForTesting
-  @NonNull @Override
+  @NonNull
+  @Override
   public Suggest getSuggest() {
     return super.getSuggest();
   }
@@ -193,13 +196,15 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     return mCandidateShowsHint;
   }
 
-  @NonNull @Override
+  @NonNull
+  @Override
   protected Suggest createSuggest() {
     return Mockito.spy(
         new TestableSuggest(
             new SuggestImpl(
                 new SuggestionsProvider(this) {
-                  @NonNull @Override
+                  @NonNull
+                  @Override
                   protected ContactsDictionary createRealContactsDictionary() {
                     return Mockito.mock(ContactsDictionary.class);
                   }
@@ -287,7 +292,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     return mEditorInfo;
   }
 
-  @NonNull @Override
+  @NonNull
+  @Override
   protected KeyboardSwitcher createKeyboardSwitcher() {
     return mTestableKeyboardSwitcher = new TestableKeyboardSwitcher(this);
   }
@@ -400,7 +406,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
       if (mSpiedKeyboardView != null) {
         mSpiedKeyboardView
             .getKeyDetector()
-            .getKeyIndexAndNearbyCodes(key.centerX, key.centerY, nearByKeyCodes);
+            .getKeyIndexAndNearbyCodes(
+                Keyboard.Key.getCenterX(key), Keyboard.Key.getCenterY(key), nearByKeyCodes);
       }
 
     } else {
@@ -417,7 +424,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     }
   }
 
-  @Nullable public Keyboard.Key findKeyWithPrimaryKeyCode(int keyCode) {
+  @Nullable
+  public Keyboard.Key findKeyWithPrimaryKeyCode(int keyCode) {
     return findKeyWithPrimaryKeyCode(keyCode, getCurrentKeyboard());
   }
 
@@ -467,16 +475,16 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     onText(key, text, true);
   }
 
-  @Override
-  public AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface() {
-    return mCreatedInputMethodSession = super.onCreateInputMethodSessionInterface();
+  public void setInputSession(InputMethodSession session) {
+    mCreatedInputMethodSession = session;
   }
 
-  public AbstractInputMethodSessionImpl getCreatedInputMethodSessionInterface() {
+  public InputMethodSession getCreatedInputMethodSessionInterface() {
     return mCreatedInputMethodSession;
   }
 
-  @NonNull @Override
+  @NonNull
+  @Override
   public AbstractInputMethodImpl onCreateInputMethodInterface() {
     return mCreatedInputMethodInterface = super.onCreateInputMethodInterface();
   }
@@ -489,7 +497,8 @@ public class TestableAnySoftKeyboard extends SoftKeyboard {
     return mInputConnection;
   }
 
-  @NonNull @Override
+  @NonNull
+  @Override
   protected DictionaryBackgroundLoader.Listener getDictionaryLoadedListener(
       @NonNull AnyKeyboard currentAlphabetKeyboard) {
     final DictionaryBackgroundLoader.Listener dictionaryLoadedListener =

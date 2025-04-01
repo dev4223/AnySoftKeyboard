@@ -16,7 +16,6 @@
 
 package com.anysoftkeyboard.ime;
 
-import android.content.res.Configuration;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodSubtype;
@@ -39,7 +38,6 @@ public abstract class AnySoftKeyboardKeyboardSwitchedListener extends AnySoftKey
   @Nullable private AnyKeyboard mCurrentAlphabetKeyboard;
   @Nullable private AnyKeyboard mCurrentSymbolsKeyboard;
   private boolean mInAlphabetKeyboardMode = true;
-  private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
 
   @Nullable private CharSequence mExpectedSubtypeChangeKeyboardId;
 
@@ -49,17 +47,14 @@ public abstract class AnySoftKeyboardKeyboardSwitchedListener extends AnySoftKey
   public void onCreate() {
     super.onCreate();
 
-    mOrientation = getResources().getConfiguration().orientation;
     mKeyboardSwitcher = createKeyboardSwitcher();
   }
 
   @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    if (newConfig.orientation != mOrientation) {
-      mOrientation = newConfig.orientation;
-      mKeyboardSwitcher.flushKeyboardsCache();
-    }
+  protected void onOrientationChanged(int oldOrientation, int newOrientation) {
+    super.onOrientationChanged(oldOrientation, newOrientation);
+
+    mKeyboardSwitcher.flushKeyboardsCache();
   }
 
   @Override
@@ -69,7 +64,8 @@ public abstract class AnySoftKeyboardKeyboardSwitchedListener extends AnySoftKey
     super.onLowMemory();
   }
 
-  @NonNull protected KeyboardSwitcher createKeyboardSwitcher() {
+  @NonNull
+  protected KeyboardSwitcher createKeyboardSwitcher() {
     return new KeyboardSwitcher(this, getApplicationContext());
   }
 
@@ -123,7 +119,8 @@ public abstract class AnySoftKeyboardKeyboardSwitchedListener extends AnySoftKey
    * Returns the last set alphabet keyboard. Notice: this may be null if the keyboard was not loaded
    * it (say, in the start up of the IME service).
    */
-  @Nullable protected final AnyKeyboard getCurrentAlphabetKeyboard() {
+  @Nullable
+  protected final AnyKeyboard getCurrentAlphabetKeyboard() {
     return mCurrentAlphabetKeyboard;
   }
 
@@ -131,7 +128,8 @@ public abstract class AnySoftKeyboardKeyboardSwitchedListener extends AnySoftKey
    * Returns the last set symbols keyboard. Notice: this may be null if the keyboard was not loaded
    * it (say, in the start up of the IME service).
    */
-  @Nullable protected final AnyKeyboard getCurrentSymbolsKeyboard() {
+  @Nullable
+  protected final AnyKeyboard getCurrentSymbolsKeyboard() {
     return mCurrentSymbolsKeyboard;
   }
 
@@ -139,7 +137,8 @@ public abstract class AnySoftKeyboardKeyboardSwitchedListener extends AnySoftKey
    * Returns the last set symbols keyboard for the current mode (alphabet or symbols). Notice: this
    * may be null if the keyboard was not loaded it (say, in the start up of the IME service).
    */
-  @Nullable protected final AnyKeyboard getCurrentKeyboard() {
+  @Nullable
+  protected final AnyKeyboard getCurrentKeyboard() {
     return mInAlphabetKeyboardMode ? mCurrentAlphabetKeyboard : mCurrentSymbolsKeyboard;
   }
 

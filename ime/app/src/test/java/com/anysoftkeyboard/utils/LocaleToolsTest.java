@@ -2,6 +2,7 @@ package com.anysoftkeyboard.utils;
 
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
@@ -31,75 +32,6 @@ public class LocaleToolsTest {
   }
 
   @Test
-  @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
-  public void testSetAndResetValueAPI16() {
-    Assert.assertEquals(
-        "English (United States)",
-        mContext.getResources().getConfiguration().locale.getDisplayName());
-
-    LocaleTools.applyLocaleToContext(mContext, "de");
-
-    Assert.assertEquals("de", mContext.getResources().getConfiguration().locale.getLanguage());
-    Assert.assertTrue(
-        mContext.getResources().getConfiguration().locale.getDisplayName().contains("German"));
-
-    LocaleTools.applyLocaleToContext(mContext, "");
-
-    Assert.assertSame(Locale.getDefault(), mContext.getResources().getConfiguration().locale);
-
-    LocaleTools.applyLocaleToContext(mContext, "NONE_EXISTING");
-
-    Assert.assertEquals(
-        "none_existing", mContext.getResources().getConfiguration().locale.getLanguage());
-  }
-
-  @Test
-  @Config(sdk = Build.VERSION_CODES.JELLY_BEAN_MR1)
-  public void testSetAndResetValueAPI17WithKnownLocale() {
-    Assert.assertEquals(
-        "English (United States)",
-        mContext.getResources().getConfiguration().locale.getDisplayName());
-
-    LocaleTools.applyLocaleToContext(mContext, "de");
-
-    Assert.assertEquals("de", mContext.getResources().getConfiguration().locale.getLanguage());
-    Assert.assertTrue(
-        mContext.getResources().getConfiguration().locale.getDisplayName().contains("German"));
-
-    LocaleTools.applyLocaleToContext(mContext, "");
-
-    Assert.assertSame(Locale.getDefault(), mContext.getResources().getConfiguration().locale);
-
-    LocaleTools.applyLocaleToContext(mContext, "NONE_EXISTING");
-
-    Assert.assertEquals(
-        "none_existing", mContext.getResources().getConfiguration().locale.getLanguage());
-  }
-
-  @Test
-  @Config(sdk = Build.VERSION_CODES.JELLY_BEAN_MR1)
-  public void testSetAndResetValueAPI17WithUnknownLocale() {
-    Assert.assertEquals(
-        "English (United States)",
-        mContext.getResources().getConfiguration().locale.getDisplayName());
-
-    LocaleTools.applyLocaleToContext(mContext, "eu");
-
-    Assert.assertEquals("eu", mContext.getResources().getConfiguration().locale.getLanguage());
-    Assert.assertTrue(
-        mContext.getResources().getConfiguration().locale.getDisplayName().contains("Basque"));
-
-    LocaleTools.applyLocaleToContext(mContext, "");
-
-    Assert.assertSame(Locale.getDefault(), mContext.getResources().getConfiguration().locale);
-
-    LocaleTools.applyLocaleToContext(mContext, "NONE_EXISTING");
-
-    Assert.assertEquals(
-        "none_existing", mContext.getResources().getConfiguration().locale.getLanguage());
-  }
-
-  @Test
   @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
   public void testSetAndResetValueAPI21() {
     Assert.assertEquals(
@@ -123,6 +55,7 @@ public class LocaleToolsTest {
     Assert.assertEquals("en", mContext.getResources().getConfiguration().locale.getLanguage());
   }
 
+  @SuppressLint("UseSdkSuppress")
   @RequiresApi(api = Build.VERSION_CODES.N)
   @Test
   @Config(sdk = Build.VERSION_CODES.N)

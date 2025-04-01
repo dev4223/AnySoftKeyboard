@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.collection.SparseArrayCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.base.utils.Logger;
@@ -92,8 +93,6 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardColorizeNavBar {
   private boolean mAutoCap;
   private boolean mKeyboardAutoCap;
 
-  private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
-
   private static boolean isBackWordDeleteCodePoint(int c) {
     return Character.isLetterOrDigit(c);
   }
@@ -130,7 +129,6 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardColorizeNavBar {
   @Override
   public void onCreate() {
     super.onCreate();
-    mOrientation = getResources().getConfiguration().orientation;
     if (!BuildConfig.DEBUG && DeveloperUtils.hasTracingRequested(getApplicationContext())) {
       try {
         DeveloperUtils.startTracing();
@@ -194,7 +192,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardColorizeNavBar {
             .subscribe(
                 type -> {
                   mPrefKeyboardInCondensedPortraitMode = type;
-                  setInitialCondensedState(getResources().getConfiguration());
+                  setInitialCondensedState(getCurrentOrientation());
                 },
                 GenericOnError.onError("settings_key_default_split_state_portrait")));
     addDisposable(
@@ -207,15 +205,19 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardColorizeNavBar {
             .subscribe(
                 type -> {
                   mPrefKeyboardInCondensedLandscapeMode = type;
-                  setInitialCondensedState(getResources().getConfiguration());
+                  setInitialCondensedState(getCurrentOrientation());
                 },
                 GenericOnError.onError("settings_key_default_split_state_landscape")));
 
-    setInitialCondensedState(getResources().getConfiguration());
+    setInitialCondensedState(getCurrentOrientation());
 
     mInputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
     // register to receive packages changes
-    registerReceiver(mPackagesChangedReceiver, mPackagesChangedReceiver.createIntentFilter());
+    ContextCompat.registerReceiver(
+        this,
+        mPackagesChangedReceiver,
+        mPackagesChangedReceiver.createIntentFilter(),
+        ContextCompat.RECEIVER_EXPORTED);
 
     addDisposable(
         prefs()
@@ -324,7 +326,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardColorizeNavBar {
       }
     }
 
-    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    if (getCurrentOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
       return mUseFullScreenInputInLandscape;
     } else {
       return mUseFullScreenInputInPortrait;
@@ -1033,7 +1035,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardColorizeNavBar {
       ic.beginBatchEdit();
       final String selectedTextString = selectedText.toString();
       AnyKeyboard currentAlphabetKeyboard = getCurrentAlphabetKeyboard();
-      @NonNull Locale locale =
+      @NonNull
+      Locale locale =
           currentAlphabetKeyboard != null ? currentAlphabetKeyboard.getLocale() : Locale.ROOT;
       // The rules:
       // lowercase -> Capitalized
@@ -1301,18 +1304,15 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardColorizeNavBar {
   }
 
   @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    if (newConfig.orientation != mOrientation) {
-      mOrientation = newConfig.orientation;
-      setInitialCondensedState(newConfig);
-    }
+  protected void onOrientationChanged(int oldOrientation, int newOrientation) {
+    super.onOrientationChanged(oldOrientation, newOrientation);
+    setInitialCondensedState(newOrientation);
   }
 
-  private void setInitialCondensedState(Configuration configuration) {
+  private void setInitialCondensedState(int orientation) {
     final CondenseType previousCondenseType = mKeyboardInCondensedMode;
     mKeyboardInCondensedMode =
-        configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        orientation == Configuration.ORIENTATION_LANDSCAPE
             ? mPrefKeyboardInCondensedLandscapeMode
             : mPrefKeyboardInCondensedPortraitMode;
 

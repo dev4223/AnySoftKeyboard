@@ -307,6 +307,9 @@ bulamıyorum. Bu özellik cihazınızda çalışamaz, üzgünüz.</string>
     <string name="key_press_preview_popup_off_summary">Tuş basma sonrasında açılır pencereyi gösterme</string>
     <string name="zoom_factor_keys_in_portrait">Dikey modda tuşların yükseklik faktörü</string>
     <string name="zoom_factor_keys_in_landscape">Yatay modda tuşların yükseklik faktörü</string>
+    <string name="keys_zoom_factor_template">%d%%</string>
+    <string name="bottom_padding_in_dp_title">Klavye alt ofseti</string>
+    <string name="bottom_padding_in_dp_template">%d puan</string>
     <string name="insert_space_after_word_suggestion_selection">Aday seçme sonrasında boşluk</string>
     <string name="insert_space_after_word_suggestion_selection_on_summary">Kelime önerisi seçimi sonrasına boşluk ekle    </string>
     <string name="double_space_to_period">Nokta koymak için iki kere boşluğa basma</string>
@@ -522,6 +525,7 @@ bulamıyorum. Bu özellik cihazınızda çalışamaz, üzgünüz.</string>
     <string name="created_mem_dump_file">Bellek dökümü dosyası şurada oluşturuldu:        <xliff:g id="file_path">%s</xliff:g>
     </string>
     <string name="not_configured_with_click_here">AnySoftKeyboard kullanım için tamamen kurulu değil. Kurmak için burayı tıklatın.</string>
+    <string name="not_notification_permission_text">AnySoftKeyboard\'un bildirim gösterme izni yok. Nadiren de olsa kritik sorunları (çökmeler gibi) bildirmemiz gerekebilir.</string>
     <string name="not_configured_with_just_click_here">Buraya tıklayın</string>
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
@@ -653,8 +657,12 @@ https://play.google.com/apps/testing/com.menny.android.anysoftkeyboard \n\nSür�
     <string name="app_share_menu_title">AnySoftKeyboard kullanmayı paylaş</string>
     <string name="app_share_text">Açık-kaynak, mahremiyet-odaklı, özgür, fazlasıyla kişiselleştirilebilen, çok-dilli Android klavye uygulaması AnySoftKeyboard\'u tavsiye ediyorum.\nEdinebileceğiniz adresler:\nPlay Store: https://play.google.com/store/apps/details?id=com.menny.android.anysoftkeyboard&amp;hl=tr\nF-Droid: https://f-droid.org/tr/packages/com.menny.android.anysoftkeyboard/</string>
     <string name="click_me_for_easter_egg_info">Bir şaşırtma için bana tıklayın</string>
-    <string name="backup_restore_not_support_before_kitkat">Android cihazınızda desteklenmiyor</string>
-    <string name="backup_restore_not_support_before_kitkat_message">Yedekleme ve geri yükleme, KitKat\'tan önceki (sürüm 4.4) Android işletim sistemini çalıştıran cihazlarda desteklenmiyor.  Üzgünüm.</string>
+    
+    
     <string name="delete_all_clipboard_entries">Panoyu temizle</string>
     <string name="tip_swipe_from_backspace_to_clear">İpucu: Boşluk tuşundan sola doğru kaydırarak kelimeyi silebilirsiniz!</string>
+    <string name="notification_read_contacts_ticker">Kişilere erişim izni gerekli</string>
+    <string name="wizard_allow_notification_permission">AnySoftKeyboard\'dan bildirimlere izin ver</string>
+    <string name="setup_wizard_step_notification_permissions_details">Nadir durumlarda (örneğin uygulama çökmeleri gibi) bildirim göndermemiz gerekebilir. İzin verilmesini öneririz ancak bildirim gönderme izin vermeme uygulamanın davranışını etkilemez.</string>
+    <string name="wizard_skip_notification_permission">Bildirimlere izin verme</string>
 </resources>

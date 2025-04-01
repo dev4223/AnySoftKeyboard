@@ -54,7 +54,7 @@ class PointerTracker {
   private OnKeyboardActionListener mListener;
 
   private Keyboard.Key[] mKeys;
-  private int mKeyHysteresisDistanceSquared = -1;
+  private final int mKeyHysteresisDistanceSquared;
 
   private final KeyState mKeyState;
 
@@ -147,10 +147,12 @@ class PointerTracker {
       KeyPressTimingHandler handler,
       KeyDetector keyDetector,
       UIProxy proxy,
+      int keyHysteresisDistance,
       @NonNull SharedPointerTrackersData sharedPointerTrackersData) {
     if (proxy == null || handler == null || keyDetector == null) {
       throw new NullPointerException();
     }
+    mKeyHysteresisDistanceSquared = keyHysteresisDistance * keyHysteresisDistance;
     mSharedPointerTrackersData = sharedPointerTrackersData;
     mPointerId = id;
     mProxy = proxy;
@@ -164,11 +166,8 @@ class PointerTracker {
     mListener = listener;
   }
 
-  public void setKeyboard(Keyboard.Key[] keys, float keyHysteresisDistance) {
-    if (keys == null || keyHysteresisDistance < 0) throw new IllegalArgumentException();
-
+  public void setKeyboard(@NonNull Keyboard.Key[] keys) {
     mKeys = keys;
-    mKeyHysteresisDistanceSquared = (int) (keyHysteresisDistance * keyHysteresisDistance);
     // Mark that keyboard layout has been changed.
     mKeyboardLayoutHasBeenChanged = true;
   }
@@ -177,7 +176,8 @@ class PointerTracker {
     return keyIndex >= 0 && keyIndex < mKeys.length;
   }
 
-  @Nullable public Keyboard.Key getKey(int keyIndex) {
+  @Nullable
+  public Keyboard.Key getKey(int keyIndex) {
     return isValidKeyIndex(keyIndex) ? mKeys[keyIndex] : null;
   }
 
@@ -424,9 +424,6 @@ class PointerTracker {
   }
 
   private boolean isMinorMoveBounce(int x, int y, int newKey) {
-    if (mKeys == null || mKeyHysteresisDistanceSquared < 0) {
-      throw new IllegalStateException("keyboard and/or hysteresis not set");
-    }
     int curKey = mKeyState.getKeyIndex();
     if (newKey == curKey) {
       return true;
@@ -439,9 +436,9 @@ class PointerTracker {
 
   private static int getSquareDistanceToKeyEdge(int x, int y, Keyboard.Key key) {
     final int left = key.x;
-    final int right = key.x + key.width;
+    final int right = Keyboard.Key.getEndX(key);
     final int top = key.y;
-    final int bottom = key.y + key.height;
+    final int bottom = Keyboard.Key.getEndY(key);
     final int edgeX = x < left ? left : Math.min(x, right);
     final int edgeY = y < top ? top : Math.min(y, bottom);
     final int dx = x - edgeX;

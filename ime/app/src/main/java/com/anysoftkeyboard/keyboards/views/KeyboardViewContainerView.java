@@ -1,26 +1,35 @@
 package com.anysoftkeyboard.keyboards.views;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import com.anysoftkeyboard.ime.InputViewActionsProvider;
 import com.anysoftkeyboard.ime.InputViewBinder;
+import com.anysoftkeyboard.keyboards.views.extradraw.ExtraDraw;
 import com.anysoftkeyboard.overlay.OverlayData;
+import com.anysoftkeyboard.overlay.OverlayDataImpl;
 import com.anysoftkeyboard.theme.KeyboardTheme;
+import com.menny.android.anysoftkeyboard.BuildConfig;
 import com.menny.android.anysoftkeyboard.R;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import net.evendanan.pixel.MainChild;
 
 public class KeyboardViewContainerView extends ViewGroup implements ThemeableChild {
 
   private static final int PROVIDER_TAG_ID = R.id.keyboard_container_provider_tag_id;
   private static final int FIRST_PROVIDER_VIEW_INDEX = 2;
+
+  private static final boolean SHOW_CLICKS = BuildConfig.DEBUG && false;
 
   private final int mActionStripHeight;
   private final List<View> mStripActionViews = new ArrayList<>();
@@ -29,8 +38,11 @@ public class KeyboardViewContainerView extends ViewGroup implements ThemeableChi
   private CandidateView mCandidateView;
   private OnKeyboardActionListener mKeyboardActionListener;
   private KeyboardTheme mKeyboardTheme;
-  private OverlayData mOverlayData = new OverlayData();
+  private OverlayData mOverlayData = new OverlayDataImpl();
   private final Rect mExtraPaddingToMainKeyboard = new Rect();
+  private ClicksExtraDraw mClicksDrawer;
+
+  private int mBottomPadding;
 
   public KeyboardViewContainerView(Context context) {
     super(context);
@@ -50,34 +62,37 @@ public class KeyboardViewContainerView extends ViewGroup implements ThemeableChi
     constructorInit();
   }
 
-  private void constructorInit() {
-    setWillNotDraw(false);
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
   public KeyboardViewContainerView(
       Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
     mActionStripHeight = getResources().getDimensionPixelSize(R.dimen.candidate_strip_height);
+    constructorInit();
+  }
+
+  private void constructorInit() {
+    if (SHOW_CLICKS) {
+      mClicksDrawer = new ClicksExtraDraw();
+    }
+    setWillNotDraw(false);
   }
 
   @Override
   public void onViewAdded(View child) {
     super.onViewAdded(child);
-    if (mKeyboardActionListener != null && child instanceof InputViewActionsProvider) {
-      ((InputViewActionsProvider) child).setOnKeyboardActionListener(mKeyboardActionListener);
+    if (mKeyboardActionListener != null && child instanceof InputViewActionsProvider c) {
+      c.setOnKeyboardActionListener(mKeyboardActionListener);
     }
 
     setThemeForChildView(child);
     setActionsStripVisibility(mShowActionStrip);
 
+    if (child instanceof MainChild c) {
+      c.setBottomOffset(mBottomPadding);
+    }
+
     switch (child.getId()) {
-      case R.id.candidate_view:
-        mCandidateView = (CandidateView) child;
-        break;
-      case R.id.AnyKeyboardMainView:
-        mStandardKeyboardView = (InputViewBinder) child;
-        break;
+      case R.id.candidate_view -> mCandidateView = (CandidateView) child;
+      case R.id.AnyKeyboardMainView -> mStandardKeyboardView = (InputViewBinder) child;
     }
   }
 
@@ -89,9 +104,20 @@ public class KeyboardViewContainerView extends ViewGroup implements ThemeableChi
 
   @Override
   public boolean onInterceptTouchEvent(MotionEvent ev) {
+    if (SHOW_CLICKS) {
+      mClicksDrawer.addClick(ev);
+    }
     if (mExtraPaddingToMainKeyboard.contains((int) ev.getX(), (int) ev.getY())) {
       // offsetting
       ev.setLocation(ev.getX(), mExtraPaddingToMainKeyboard.bottom + 1f);
+    }
+    if (SHOW_CLICKS) {
+      mClicksDrawer.addTranslatedClick(ev);
+      if (mClicksDrawer.shouldDraw()) {
+        if (mStandardKeyboardView instanceof AnyKeyboardViewWithExtraDraw extraDrawer) {
+          extraDrawer.addExtraDraw(mClicksDrawer);
+        }
+      }
     }
     return false;
   }
@@ -225,9 +251,9 @@ public class KeyboardViewContainerView extends ViewGroup implements ThemeableChi
   }
 
   private void setThemeForChildView(View child) {
-    if (child instanceof ThemeableChild && mKeyboardTheme != null) {
-      ((ThemeableChild) child).setKeyboardTheme(mKeyboardTheme);
-      ((ThemeableChild) child).setThemeOverlay(mOverlayData);
+    if (child instanceof ThemeableChild c && mKeyboardTheme != null) {
+      c.setKeyboardTheme(mKeyboardTheme);
+      c.setThemeOverlay(mOverlayData);
     }
   }
 
@@ -266,12 +292,81 @@ public class KeyboardViewContainerView extends ViewGroup implements ThemeableChi
   }
 
   public void setBottomPadding(int bottomPadding) {
-    ((AnyKeyboardView) getStandardKeyboardView()).setBottomOffset(bottomPadding);
+    mBottomPadding = bottomPadding;
+    for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+      if (getChildAt(childIndex) instanceof MainChild v) {
+        v.setBottomOffset(bottomPadding);
+      }
+    }
   }
 
   public interface StripActionProvider {
-    @NonNull View inflateActionView(@NonNull ViewGroup parent);
+    @NonNull
+    View inflateActionView(@NonNull ViewGroup parent);
 
     void onRemoved();
+  }
+
+  private static class ClicksExtraDraw implements ExtraDraw {
+
+    private final Random mRandom = new Random();
+    private final Paint mPaint = new Paint();
+
+    private final List<PointF> mClicks = new ArrayList<>();
+    private final List<PointF> mTranslatedClicks = new ArrayList<>();
+
+    private int mFrames;
+
+    void addClick(MotionEvent ev) {
+      mFrames = 0;
+      mClicks.add(new PointF(ev.getX(), ev.getY()));
+    }
+
+    void addTranslatedClick(MotionEvent ev) {
+      var click = mClicks.get(mClicks.size() - 1);
+      var translated = new PointF(ev.getX() - click.x, ev.getY() - click.y);
+      mTranslatedClicks.add(translated);
+    }
+
+    void clearClicks() {
+      mClicks.clear();
+      mTranslatedClicks.clear();
+    }
+
+    @Override
+    public boolean onDraw(
+        Canvas canvas, Paint keyValuesPaint, AnyKeyboardViewWithExtraDraw parentKeyboardView) {
+      if (++mFrames > 200) {
+        mFrames = 0;
+        clearClicks();
+      }
+
+      canvas.translate(0, -parentKeyboardView.getPaddingBottom());
+      for (int i = 0; i < mClicks.size(); i++) {
+        var click = mClicks.get(i);
+        var translated = mTranslatedClicks.get(i);
+
+        canvas.translate(click.x, click.y);
+        mPaint.setColor(
+            Color.argb(
+                255,
+                150 + mRandom.nextInt(100),
+                150 + mRandom.nextInt(100),
+                150 + mRandom.nextInt(100)));
+        mPaint.setStrokeWidth(2f);
+        canvas.drawCircle(0, 0, 3, mPaint);
+        canvas.drawCircle(translated.x, translated.y, 6, mPaint);
+        canvas.drawLine(0, 0, translated.x, translated.y, mPaint);
+        canvas.translate(-click.x, -click.y);
+      }
+
+      canvas.translate(0, parentKeyboardView.getPaddingBottom());
+
+      return mFrames > 0;
+    }
+
+    public boolean shouldDraw() {
+      return !mClicks.isEmpty() && mClicks.size() % 10 == 0;
+    }
   }
 }

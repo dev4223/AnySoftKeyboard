@@ -52,6 +52,9 @@ for f in $(find . -name 'alpha.txt'); do
   cp $f "$(dirname $f)/production.txt"
 done
 
+echo "Generating store assets..."
+./gradlew generateStoreLogoIcon
+
 DEPLOY_ARGS=()
 DEPLOY_TASKS=( "--rerun-tasks" "--continue" "--stacktrace" "-PwithAutoVersioning" "-PonlyPublishSupporting=${DEPLOY_CHANNEL}" )
 if [[ "${FRACTION}" == "1.00" ]]; then
@@ -108,7 +111,7 @@ fi
 
 echo "Counter is ${BUILD_COUNT_FOR_VERSION}, crash email: ${ANYSOFTKEYBOARD_CRASH_REPORT_EMAIL}, and tasks: ${DEPLOY_TASKS[*]}, and DEPLOY_ARGS: ${DEPLOY_ARGS[*]}"
 
-./gradlew "${DEPLOY_TASKS[@]}" "${DEPLOY_ARGS[@]}"
+./gradlew "${DEPLOY_TASKS[@]}" "${DEPLOY_ARGS[@]}" --continue
 
 #Making sure no future deployments will happen on this branch.
 if [[ "${FRACTION}" == "1.00" ]] && [[ "${DEPLOY_CHANNEL}" == "production" ]]; then

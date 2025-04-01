@@ -70,7 +70,8 @@ public class GestureTypingDetector {
     mGenerateStateSubject.onNext(LoadingState.NOT_LOADED);
   }
 
-  @NonNull public Observable<LoadingState> state() {
+  @NonNull
+  public Observable<LoadingState> state() {
     return mGenerateStateSubject;
   }
 
@@ -170,7 +171,7 @@ public class GestureTypingDetector {
       }
 
       lastLetter = c;
-      workspaceData.addPoint(keyHit.centerX, keyHit.centerY);
+      workspaceData.addPoint(Keyboard.Key.getCenterX(keyHit), Keyboard.Key.getCenterY(keyHit));
     }
 
     return getPathCorners(workspaceData);

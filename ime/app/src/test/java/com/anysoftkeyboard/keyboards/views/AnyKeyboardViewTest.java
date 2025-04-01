@@ -79,18 +79,35 @@ public class AnyKeyboardViewTest extends AnyKeyboardViewWithMiniKeyboardTest {
     Mockito.verifyZeroInteractions(mMockKeyboardListener);
 
     MotionEvent motionEvent =
-        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, key.centerX, key.centerY, 0);
+        MotionEvent.obtain(
+            100,
+            100,
+            MotionEvent.ACTION_DOWN,
+            Keyboard.Key.getCenterX(key),
+            Keyboard.Key.getCenterY(key),
+            0);
     mViewUnderTest.onTouchEvent(motionEvent);
     motionEvent.recycle();
     Mockito.verify(mMockKeyboardListener).onPress(primaryCode);
     Mockito.verify(mMockKeyboardListener).onFirstDownKey(primaryCode);
     Mockito.verify(mMockKeyboardListener)
-        .onGestureTypingInputStart(eq(key.centerX), eq(key.centerY), same(key), anyLong());
+        .onGestureTypingInputStart(
+            eq(Keyboard.Key.getCenterX(key)),
+            eq(Keyboard.Key.getCenterY(key)),
+            same(key),
+            anyLong());
     Mockito.verifyNoMoreInteractions(mMockKeyboardListener);
 
     Mockito.reset(mMockKeyboardListener);
 
-    motionEvent = MotionEvent.obtain(100, 110, MotionEvent.ACTION_UP, key.centerX, key.centerY, 0);
+    motionEvent =
+        MotionEvent.obtain(
+            100,
+            110,
+            MotionEvent.ACTION_UP,
+            Keyboard.Key.getCenterX(key),
+            Keyboard.Key.getCenterY(key),
+            0);
     mViewUnderTest.onTouchEvent(motionEvent);
     motionEvent.recycle();
     InOrder inOrder = Mockito.inOrder(mMockKeyboardListener);
@@ -551,7 +568,7 @@ public class AnyKeyboardViewTest extends AnyKeyboardViewWithMiniKeyboardTest {
         new Point(
             mViewUnderTest.getThemedKeyboardDimens().getKeyboardMaxWidth() - 1, edgeKey.y + 5);
     Assert.assertTrue(edgeKey.isInside(edgeTouchPoint.x, edgeTouchPoint.y));
-    Assert.assertTrue(edgeTouchPoint.x > edgeKey.x + edgeKey.width + edgeKey.gap);
+    Assert.assertTrue(edgeTouchPoint.x > Keyboard.Key.getEndX(edgeKey) + edgeKey.gap);
 
     ViewTestUtils.navigateFromTo(mViewUnderTest, edgeTouchPoint, edgeTouchPoint, 40, true, true);
   }
@@ -745,5 +762,52 @@ public class AnyKeyboardViewTest extends AnyKeyboardViewWithMiniKeyboardTest {
     inOrder.verify(canvas).translate(-x + dimen + margin, -y);
     inOrder.verify(canvas).translate(x - dimen - dimen - margin - margin, y);
     inOrder.verify(canvas).translate(-x + dimen + dimen + margin + margin, -y);
+  }
+
+  @Test
+  public void testSwipeDownWhenGestureTypingIsDisabled() {
+    SharedPrefsHelper.setPrefsValue(R.string.settings_key_gesture_typing, false);
+    sleep(1225);
+    Mockito.doReturn(false)
+        .when(mMockKeyboardListener)
+        .onGestureTypingInputStart(anyInt(), anyInt(), any(), anyLong());
+
+    final AnyKeyboard.AnyKey topKey = requireFindKey('t');
+    final AnyKeyboard.AnyKey bottomKey = requireFindKey('c');
+    ViewTestUtils.navigateFromTo(mViewUnderTest, topKey, bottomKey, 100, true, true);
+
+    Mockito.verify(mMockKeyboardListener).onSwipeDown();
+  }
+
+  @Test
+  public void testSmallSwipeDownWhenGestureTypingIsEnabled() {
+    SharedPrefsHelper.setPrefsValue(R.string.settings_key_gesture_typing, true);
+    sleep(1225);
+    Mockito.doReturn(true)
+        .when(mMockKeyboardListener)
+        .onGestureTypingInputStart(anyInt(), anyInt(), any(), anyLong());
+
+    final AnyKeyboard.AnyKey topKey = requireFindKey('t');
+    final AnyKeyboard.AnyKey bottomKey = requireFindKey('c');
+    ViewTestUtils.navigateFromTo(mViewUnderTest, topKey, bottomKey, 100, true, true);
+
+    Mockito.verify(mMockKeyboardListener, Mockito.never()).onSwipeDown();
+  }
+
+  @Test
+  public void testLargeSwipeDownWhenGestureTypingIsEnabled() {
+    SharedPrefsHelper.setPrefsValue(R.string.settings_key_gesture_typing, true);
+    sleep(1225);
+    Mockito.doReturn(true)
+        .when(mMockKeyboardListener)
+        .onGestureTypingInputStart(anyInt(), anyInt(), any(), anyLong());
+
+    final AnyKeyboard.AnyKey topKey = requireFindKey('t');
+    final var bottomPoint = getKeyCenterPoint(requireFindKey(' '));
+    bottomPoint.offset(0, topKey.height);
+    ViewTestUtils.navigateFromTo(
+        mViewUnderTest, getKeyCenterPoint(topKey), bottomPoint, 100, true, true);
+
+    Mockito.verify(mMockKeyboardListener).onSwipeDown();
   }
 }
