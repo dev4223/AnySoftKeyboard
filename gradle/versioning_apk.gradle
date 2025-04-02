@@ -13,7 +13,7 @@ android.defaultConfig {
     versionCode versioningProject.autoVersioning.versionData.versionCode
     versionName versioningProject.autoVersioning.versionData.versionName
     //versionName "1.10.6311"
-    archivesBaseName = "AnySoftKeyboard-v$versionName-hk1"
+    archivesBaseName = "AnySoftKeyboard-v$versionName-hk2"
 
     println "Building ${project.path} ${versionName} (or ${project.version}), code ${versionCode}."
 }
